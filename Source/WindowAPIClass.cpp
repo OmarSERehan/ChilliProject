@@ -1,30 +1,25 @@
-#include "WindowClass.h"
+#include "WindowAPIClass.h"
 
-std::shared_ptr<WindowAPIClass> WindowAPIClass::CreateWindowClass(LPCWSTR className, MessageHandler messageHandler) noexcept
+std::shared_ptr<WindowAPIClass> WindowAPIClass::CreateObject(LPCWSTR className, MessageHandler messageHandler) noexcept
 {
 	std::shared_ptr<WindowAPIClass> pWindowClass = std::make_shared<WindowAPIClass>();
 	
 	pWindowClass->SetApplicationHandle(GetModuleHandle(nullptr));
-	pWindowClass->SetWindowClassName(className);
+	pWindowClass->SetName(className);
 	pWindowClass->SetMessageHandler(messageHandler);
 
-	return pWindowClass;
-}
 
-
-bool WindowAPIClass::RegisterWindowClass() const noexcept
-{
 	WNDCLASS WindowClassStruct = { NULL };
 
-	WindowClassStruct.hInstance = m_applicationHandle;
-	WindowClassStruct.lpszClassName = m_className;
+	WindowClassStruct.hInstance = pWindowClass->GetApplicationHandle();
+	WindowClassStruct.lpszClassName = pWindowClass->GetName();
 	WindowClassStruct.lpszMenuName = nullptr;
 	WindowClassStruct.lpfnWndProc = HandleMessageEntryPoint;
 	WindowClassStruct.style = CS_OWNDC;
 
 	WindowClassStruct.cbClsExtra = 0;
 	WindowClassStruct.cbWndExtra = 0;
-	WindowClassStruct.hIcon = static_cast<HICON>(LoadImage(m_applicationHandle, MAKEINTRESOURCE(IDI_ICON2), IMAGE_ICON, 32, 32, 0));
+	WindowClassStruct.hIcon = static_cast<HICON>(LoadImage(pWindowClass->GetApplicationHandle(), MAKEINTRESOURCE(IDI_ICON2), IMAGE_ICON, 32, 32, 0));
 	WindowClassStruct.hCursor = nullptr;
 	WindowClassStruct.hbrBackground = nullptr;
 
@@ -33,15 +28,15 @@ bool WindowAPIClass::RegisterWindowClass() const noexcept
 	{
 		std::wstring errorString = std::to_wstring(GetLastError());
 		MessageBox(nullptr, errorString.c_str(), L"Error registering window class", MB_OK | MB_ICONEXCLAMATION);
-		return false;
+		return nullptr;
 	}
 
-	return true;
+	return pWindowClass;
 }
 
-bool WindowAPIClass::UnregisterWindowClass() const noexcept
+bool WindowAPIClass::DestroyObject() const noexcept
 {
-	ATOM result = UnregisterClass(m_className, m_applicationHandle);
+	ATOM result = UnregisterClass(m_pName, m_applicationHandle);
 	if (!result)
 	{
 		std::wstring errorCode = std::to_wstring(GetLastError());
@@ -58,9 +53,9 @@ HINSTANCE WindowAPIClass::GetApplicationHandle() const noexcept
 	return m_applicationHandle;
 }
 
-LPCTSTR WindowAPIClass::GetWindowClassName() const noexcept
+LPCTSTR WindowAPIClass::GetName() const noexcept
 {
-	return m_className;
+	return m_pName;
 }
 
 
@@ -69,9 +64,9 @@ void WindowAPIClass::SetApplicationHandle(HINSTANCE applicationHandle) noexcept
 	m_applicationHandle = applicationHandle;
 }
 
-void WindowAPIClass::SetWindowClassName(LPCWSTR className) noexcept
+void WindowAPIClass::SetName(LPCWSTR className) noexcept
 {
-	m_className = className;
+	m_pName = className;
 }
 
 void WindowAPIClass::SetMessageHandler(MessageHandler messageHandler) noexcept

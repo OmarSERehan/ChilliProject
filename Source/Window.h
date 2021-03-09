@@ -1,59 +1,71 @@
 #pragma once
+#include <thread>
 #include <utility>
 #include <iostream>
+#include <optional>
 #include <functional>
 
-#include "WindowClass.h"
+#include "WindowAPIClass.h"
 #include "Keyboard.h"
+#include "Mouse.h"
+#include "Graphics.h"
+
 
 class Window
 {
 public:
-	static std::shared_ptr<Window> CreateWindowInstance(
-		std::shared_ptr<WindowAPIClass> pWindowClass,
+	static std::shared_ptr<Window> CreateObject(
 		LPCTSTR windowTitle = L"Window Title",
-		uint32_t clientWidth = 640,
-		uint32_t clientHeight = 320,
-		uint32_t positionX = 100,
-		uint32_t positionY = 100
-	) noexcept;
+		int32_t clientWidth = 800,
+		int32_t clientHeight = 600,
+		int32_t positionX = 100,
+		int32_t positionY = 100,
+		std::shared_ptr<WindowAPIClass> pWindowClass = nullptr,
+		std::shared_ptr<Graphics> pGraphics = nullptr) noexcept;
+	bool DestroyObject() noexcept;
 
-	void DestroyWindowInstance() const noexcept;
+	bool Show() const noexcept;
+	bool Hide() const noexcept;
 	
+	static std::optional<int32_t> ProcessMessages() noexcept;
 	LRESULT HandleMessage(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam);
 
+	bool SetTitle(const std::wstring& title) noexcept;
+
+	std::shared_ptr<WindowAPIClass> GetWindowClass() const noexcept;
 	std::shared_ptr<Keyboard> GetKeyboard() const noexcept;
+	std::shared_ptr<Mouse> GetMouse() const noexcept;
+	std::shared_ptr<Graphics> GetGraphics() const noexcept;
 
 
 private:
-	/// Private Functions
 	void SetWindowClass(std::shared_ptr<WindowAPIClass> pWindowClass) noexcept;
-	std::shared_ptr<WindowAPIClass> GetWindowClass() const noexcept;
-
-	void SetWidth(uint32_t width) noexcept;
-	void SetHeight(uint32_t height) noexcept;
+	void SetWidth(int32_t width) noexcept;
+	void SetHeight(int32_t height) noexcept;
 	void SetHandle(HWND handle) noexcept;
 	void SetKeyboard(std::shared_ptr<Keyboard> pKeyboard) noexcept;
+	void SetMouse(std::shared_ptr<Mouse> pMouse) noexcept;
+	void SetGraphics(std::shared_ptr<Graphics> pGraphics) noexcept;
 
-	/// Private Variables
-	std::shared_ptr<WindowAPIClass> m_pWindowClass;
 
 	HWND m_handle = NULL;
-	uint32_t m_width = 0;
-	uint32_t m_height = 0;
+	int32_t m_width = 0;
+	int32_t m_height = 0;
+	LPCTSTR m_title = L"";
 
+	std::shared_ptr<WindowAPIClass> m_pWindowClass;
 	std::shared_ptr<Keyboard> m_pKeyboard;
+	std::shared_ptr<Mouse> m_pMouse;
+	std::shared_ptr<Graphics> m_pGraphics;
 
 
 public:
 	Window() = default;
 	~Window() = default;
 
-	// Copy sematics
 	Window(const Window&) = delete;
 	Window& operator = (const Window&) = delete;
 
-	// Move semantics
 	Window(Window&&) = delete;
 	Window& operator = (Window&&) = delete;
 };

@@ -1,0 +1,79 @@
+
+Component Object Model (COM):
+============================
+
+= Features:
+	- Language Agnostic:
+		+ Compatible across different languages.
+		+ Compatible across different compilers and different compiler versions.
+	- Reource Allocation:
+		+ Provides its own memory allocation system for COM objects.
+	- Object Creation:
+		+ Pass object type id to factory function.
+		+ factory function checks central registry and creates the object.
+		+ factory function returns an interface handle to the created object.
+	- Interface/Polymorphism:
+		+ Dealing with objects happens through interfaces not concrete objects.
+	- Encapsulation without language support.
+	- Thread Safety.
+	- Distributed.
+
+
+= IUnknown:
+	- QueryInterface: takes iid and empty double pointer -> tries to assign the pointer the requested interface if it is actually supported
+	- AddRef: increment reference count
+	- Release: decrement reference count
+
+
+
+
+
+Direct3D Architecture:
+=====================
+
+	DirectX Grahpical Infrastructure: (not updated as much)
+	--------------------------------
+
+		= Device: (logical graphics card) -> allocates resources & creates objects
+			- Context: (also logical graphics card) -> configures rendering pipeline & issues rendering commands
+
+			- Swap Chain:
+				+ Texture:
+					> RenderTargetV: (frame buffer to be bound to pipeline & be rendered to)
+				+ Texture:
+
+			- Buffer: 
+				+ View:
+
+			- Texture:
+				+ View:
+
+			- State:
+
+			- Shader: 
+
+			- Viewport: maps from NDC to screen coords or a subregion from the screen
+
+
+
+
+Rendering Pipeline:
+==================
+
+	= Input Assembler (takes buffers):
+
+	= Vertex Shader (manipulates buffers):
+
+	= Hull Shader:
+
+	= Tesselation:
+
+	= Domain Shader:
+
+	= Geometry Shader:
+
+	= Rasterizer:
+
+	= Pixel Shader:
+
+	= Output Merger:
