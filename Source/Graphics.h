@@ -17,7 +17,7 @@ public:
 	bool SwapFrames() noexcept;
 	
 	bool ClearBackBuffer(float r, float g, float b) noexcept;
-	bool DrawTestTriangle() noexcept;
+	bool DrawTestTriangle(float angle) noexcept;
 
 
 	Microsoft::WRL::ComPtr<ID3D11Device> GetDevice() const;
@@ -26,6 +26,8 @@ public:
 
 
 private:
+	float m_inverseAspectRatio = 0.75f;
+
 	void SetDevice(Microsoft::WRL::ComPtr<ID3D11Device> pDevice) noexcept;
 	void SetSwapChain(Microsoft::WRL::ComPtr<IDXGISwapChain> pSwapChain) noexcept;
 	void SetContext(Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext) noexcept;

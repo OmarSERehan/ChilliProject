@@ -55,7 +55,7 @@ bool Application::Frame() noexcept
 	{
 		return false;
 	}
-	if (!m_pWindow->GetGraphics()->DrawTestTriangle())
+	if (!m_pWindow->GetGraphics()->DrawTestTriangle(m_pTimer->Peek()))
 	{
 		return false;
 	}

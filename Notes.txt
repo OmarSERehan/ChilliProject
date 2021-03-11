@@ -42,7 +42,7 @@ Direct3D Architecture:
 					> RenderTargetV: (frame buffer to be bound to pipeline & be rendered to)
 				+ Texture:
 
-			- Buffer: 
+			- Buffer:
 				+ View:
 
 			- Texture:
@@ -50,7 +50,9 @@ Direct3D Architecture:
 
 			- State:
 
-			- Shader: 
+			- Shader:
+
+			- Shader Constant Buffer (like OpenGL uniforms):
 
 			- Viewport: maps from NDC to screen coords or a subregion from the screen
 

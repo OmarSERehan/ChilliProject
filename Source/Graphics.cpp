@@ -161,7 +161,7 @@ bool Graphics::ClearBackBuffer(float r, float g, float b) noexcept
 	m_pContext->ClearRenderTargetView(m_pBackBufferRTV.Get(), color);
 	return true;
 }
-bool Graphics::DrawTestTriangle() noexcept
+bool Graphics::DrawTestTriangle(float angle) noexcept
 {
 	HRESULT result;
 
@@ -178,7 +178,7 @@ bool Graphics::DrawTestTriangle() noexcept
 		{ -0.5f, -0.5f,		000, 000, 255, 255 },
 		{ -0.3f, +0.3f,		255, 255, 000, 255 },
 		{ +0.3f, +0.3f,		255, 000, 255, 255 },
-		{ +0.0f, -0.8f,		000, 255, 255, 255 }
+		{ +0.0f, -1.0f,		000, 255, 255, 255 }
 	};
 	const uint16_t indices[]
 	{ // must be CW not CCW
@@ -261,7 +261,7 @@ bool Graphics::DrawTestTriangle() noexcept
 		if (FAILED(result) == TRUE)
 		{
 			std::wstring errorString = L"ID3D11Device::CreateBuffer: Failed";
-			MessageBox(nullptr, errorString.c_str(), L"Error creating buffer", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(nullptr, errorString.c_str(), L"Error creating vertex buffer", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
@@ -299,13 +299,11 @@ bool Graphics::DrawTestTriangle() noexcept
 		if (FAILED(result) == TRUE)
 		{
 			std::wstring errorString = L"ID3D11Device::CreateBuffer: Failed";
-			MessageBox(nullptr, errorString.c_str(), L"Error creating buffer", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(nullptr, errorString.c_str(), L"Error creating index buffer", MB_OK | MB_ICONEXCLAMATION);
 			return false;
 		}
 
 		/// Bind buffer to render pipeline
-		const UINT stride = sizeof(Vertex);
-		const UINT offset = 0u;
 		m_pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
 	}
 
@@ -345,6 +343,55 @@ bool Graphics::DrawTestTriangle() noexcept
 		m_pContext->IASetInputLayout(pInputLayout.Get());
 
 		m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	}
+
+
+	/// Create Transforation Matrix Constant Buffer
+	{
+		struct ConstantBuffer {
+			struct { float matrix[4][4]; } Transformation;
+		};
+
+		const ConstantBuffer constBuffer
+		{
+			{ // Rotation Matrix
+				m_inverseAspectRatio * +std::cos(angle),	+std::sin(angle),	0.0f,	0.0f,
+				m_inverseAspectRatio * -std::sin(angle),	+std::cos(angle),	0.0f,	0.0f,
+				+0.0f,										0.0f,				1.0f,	0.0f,
+				+0.0f,										0.0f,				0.0f,	1.0f
+			}
+		};
+	
+		D3D11_SUBRESOURCE_DATA bufferInitialData;
+		{
+			bufferInitialData.pSysMem = &constBuffer;
+		}
+
+		/// Data about the buffer (as a whole) we want to create
+		D3D11_BUFFER_DESC bufferDescription;
+		{
+			bufferDescription.Usage = D3D11_USAGE_DYNAMIC;
+			bufferDescription.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+			bufferDescription.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; // dynamic usage
+			bufferDescription.MiscFlags = NULL;
+
+			bufferDescription.StructureByteStride = NULL; // not an array
+			bufferDescription.ByteWidth = sizeof(constBuffer);
+		}
+
+		/// Create constant buffer
+		Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer = nullptr;
+		result = m_pDevice->CreateBuffer(&bufferDescription, &bufferInitialData, &pConstantBuffer);
+		if (FAILED(result) == TRUE)
+		{
+			std::wstring errorString = L"ID3D11Device::CreateBuffer: Failed";
+			MessageBox(nullptr, errorString.c_str(), L"Error creating constant buffer", MB_OK | MB_ICONEXCLAMATION);
+			return false;
+		}
+
+		/// Bind buffer to render pipeline
+		m_pContext->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
 	}
 
 
