@@ -168,15 +168,24 @@ bool Graphics::DrawTestTriangle() noexcept
 	/// Actual vertices data
 	struct Vertex
 	{
-		float x, y;
-		float r, g, b;
+		struct { float x, y; } Position;
+		struct { unsigned char r, g, b, a; } Color;
 	};
 	const Vertex vertices[]
-	{ 
-		// must be CW not CCW
-		{ +0.0f, +0.5f, +1.0f, +0.0f, +0.0f },
-		{ +0.5f, -0.5f, +0.0f, +1.0f, +0.0f },
-		{ -0.5f, -0.5f, +0.0f, +0.0f, +1.0f }
+	{
+		{ +0.0f, +0.5f,		255, 000, 000, 255 },
+		{ +0.5f, -0.5f,		000, 255, 000, 255 },
+		{ -0.5f, -0.5f,		000, 000, 255, 255 },
+		{ -0.3f, +0.3f,		255, 255, 000, 255 },
+		{ +0.3f, +0.3f,		255, 000, 255, 255 },
+		{ +0.0f, -0.8f,		000, 255, 255, 255 }
+	};
+	const uint16_t indices[]
+	{ // must be CW not CCW
+		0, 1, 2,
+		0, 2, 3,
+		0, 4, 1,
+		2, 1, 5
 	};
 	
 
@@ -264,6 +273,43 @@ bool Graphics::DrawTestTriangle() noexcept
 	}
 
 
+	/// Create & Bind Index Buffer
+	{
+		D3D11_SUBRESOURCE_DATA bufferInitialData;
+		{
+			bufferInitialData.pSysMem = indices;
+		}
+
+		/// Data about the buffer (as a whole) we want to create
+		D3D11_BUFFER_DESC bufferDescription;
+		{
+			bufferDescription.Usage = D3D11_USAGE_DEFAULT;
+			bufferDescription.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+			bufferDescription.CPUAccessFlags = NULL;
+			bufferDescription.MiscFlags = NULL;
+
+			bufferDescription.StructureByteStride = sizeof(uint16_t);
+			bufferDescription.ByteWidth = sizeof(indices);
+		}
+
+		/// Create index buffer
+		Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer = nullptr;
+		result = m_pDevice->CreateBuffer(&bufferDescription, &bufferInitialData, &pIndexBuffer);
+		if (FAILED(result) == TRUE)
+		{
+			std::wstring errorString = L"ID3D11Device::CreateBuffer: Failed";
+			MessageBox(nullptr, errorString.c_str(), L"Error creating buffer", MB_OK | MB_ICONEXCLAMATION);
+			return false;
+		}
+
+		/// Bind buffer to render pipeline
+		const UINT stride = sizeof(Vertex);
+		const UINT offset = 0u;
+		m_pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
+	}
+
+
 	/// Create & Set Input Layout
 	{
 		/// Specify how the data is laid out in the vertex buffer
@@ -285,7 +331,7 @@ bool Graphics::DrawTestTriangle() noexcept
 				"COLOR",						// SemanticName (Vertex shader)
 				0,								// SemanticIndex (Vertex shader)
 
-				DXGI_FORMAT_R32G32B32_FLOAT,	// Format (3 floats)
+				DXGI_FORMAT_R8G8B8A8_UNORM,		// Format (4 8-bit types normalized to floats)
 				0,								// InputSlot (keep it zero for now)
 				8u,								// AlignedByteOffset
 
@@ -312,14 +358,14 @@ bool Graphics::DrawTestTriangle() noexcept
 	{
 		D3D11_VIEWPORT viewport;
 		{ /// properties relative to render target view
-			viewport.TopLeftX = 0;
-			viewport.TopLeftY = 0;
+			viewport.TopLeftX = 0.0f;
+			viewport.TopLeftY = 0.0f;
 			
-			viewport.Width = 800;
-			viewport.Height = 600;
+			viewport.Width = 800.0f;
+			viewport.Height = 600.0f;
 			
-			viewport.MinDepth = 0;
-			viewport.MaxDepth = 1;
+			viewport.MinDepth = 0.0f;
+			viewport.MaxDepth = 1.0f;
 		}
 		
 		m_pContext->RSSetViewports(1u, &viewport);
@@ -329,7 +375,7 @@ bool Graphics::DrawTestTriangle() noexcept
 	/// Issue draw command
 	{
 		dxgiInfoManager.Mark();
-		m_pContext->Draw(std::size(vertices), 0u);
+		m_pContext->DrawIndexed(std::size(indices), 0u, 0u);
 		std::vector<std::string> messages = dxgiInfoManager.GetMessages();
 		if (!messages.empty())
 		{

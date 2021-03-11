@@ -1,11 +1,11 @@
 
 struct VSOut
 {
-	float3 oColor : COLOR0;
+	float4 oColor : COLOR0;
 	float4 oPosition : SV_POSITION;
 };
 
-VSOut main(float2 iPosition : POSITION0, float3 iColor : COLOR0)
+VSOut main(float2 iPosition : POSITION0, float4 iColor : COLOR0)
 {
 	VSOut output;
 	
