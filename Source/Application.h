@@ -9,7 +9,7 @@ public:
 	static std::shared_ptr<Application> CreateObject(std::shared_ptr<Window> pWindow = nullptr) noexcept;
 	void DestroyObject() noexcept;
 
-	int32_t StartGameLoop() noexcept;
+	uint64_t StartGameLoop() noexcept;
 
 	void SetWindow(std::shared_ptr<Window> pWindow) noexcept;
 	void SetTimer(std::shared_ptr<Timer> pTimer) noexcept;

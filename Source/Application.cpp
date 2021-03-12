@@ -21,7 +21,7 @@ void Application::DestroyObject() noexcept
 }
 
 
-int32_t Application::StartGameLoop() noexcept
+uint64_t Application::StartGameLoop() noexcept
 {
 	while (true)
 	{

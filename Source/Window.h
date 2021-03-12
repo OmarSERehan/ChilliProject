@@ -1,10 +1,10 @@
 #pragma once
-#include <thread>
 #include <utility>
 #include <iostream>
 #include <optional>
 #include <functional>
 
+#include "PopUp.h"
 #include "WindowAPIClass.h"
 #include "Keyboard.h"
 #include "Mouse.h"
@@ -27,7 +27,7 @@ public:
 	bool Show() const noexcept;
 	bool Hide() const noexcept;
 	
-	static std::optional<int32_t> ProcessMessages() noexcept;
+	static std::optional<uint64_t> ProcessMessages() noexcept;
 	LRESULT HandleMessage(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam);
 
 	bool SetTitle(const std::wstring& title) noexcept;

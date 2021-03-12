@@ -62,32 +62,8 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 	);
 	if (FAILED(result) == TRUE)
 	{
-		switch (result) {
-		case DXGI_ERROR_NOT_CURRENTLY_AVAILABLE:
-		{
-			std::wstring errorString = L"D3D11CreateDeviceAndSwapChain: called in a session 0 process";
-			MessageBox(nullptr, errorString.c_str(), L"Error initializing Direct3D", MB_OK | MB_ICONEXCLAMATION);
-			return nullptr;
-		}
-		case E_INVALIDARG:
-		{
-			std::wstring errorString = L"D3D11CreateDeviceAndSwapChain: pAdapter is non-NULL and the DriverType is set to D3D_DRIVER_TYPE_HARDWARE";
-			MessageBox(nullptr, errorString.c_str(), L"Error initializing Direct3D", MB_OK | MB_ICONEXCLAMATION);
-			return nullptr;
-		}
-		case DXGI_ERROR_SDK_COMPONENT_MISSING:
-		{
-			std::wstring errorString = L"D3D11CreateDeviceAndSwapChain: specified D3D11_CREATE_DEVICE_DEBUG in flags and the incorrect version of the debug layer is installed on your computer";
-			MessageBox(nullptr, errorString.c_str(), L"Error initializing Direct3D", MB_OK | MB_ICONEXCLAMATION);
-			return nullptr;
-		}
-		default:
-		{
-			std::wstring errorString = L"D3D11CreateDeviceAndSwapChain: some error";
-			MessageBox(nullptr, errorString.c_str(), L"Error initializing Direct3D", MB_OK | MB_ICONEXCLAMATION);
-			return nullptr;
-		}
-		}
+		PopUp::ErrorBox(L"Error Creating Device/SwapChain/DeviceContext", result, __FILE__, __LINE__);
+		return nullptr;
 	}
 
 	pGraphics->SetDevice(pDevice);
@@ -101,8 +77,7 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 		result = pGraphics->GetSwapChain()->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer);
 		if (FAILED(result) == TRUE)
 		{
-			std::wstring errorString = L"IDXGISwapChain::GetBuffer: failed";
-			MessageBox(nullptr, errorString.c_str(), L"Error getting swap chain's back buffer", MB_OK | MB_ICONEXCLAMATION);
+			PopUp::ErrorBox(L"Error Creating Buffer", result, __FILE__, __LINE__);
 			return nullptr;
 		}
 
@@ -111,8 +86,7 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 		result = pGraphics->GetDevice()->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &pRTV);
 		if (FAILED(result) == TRUE)
 		{
-			std::wstring errorString = L"ID3D11Device::CreateRenderTargetView: failed";
-			MessageBox(nullptr, errorString.c_str(), L"Error creating render target for back buffer in swap chain", MB_OK | MB_ICONEXCLAMATION);
+			PopUp::ErrorBox(L"Error Creating Render Target View", result, __FILE__, __LINE__);
 			return nullptr;
 		}
 		pGraphics->SetBackBufferRTV(pRTV);
@@ -195,16 +169,15 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = D3DReadFileToBlob(L"Source/SimplePS.cso", &pPSBlob);
 		if (FAILED(result) == TRUE)
 		{
-			std::wstring errorString = L"D3DReadFileToBlob: Failed";
-			MessageBox(nullptr, errorString.c_str(), L"Error loading pixel shader", MB_OK | MB_ICONEXCLAMATION);
+			PopUp::ErrorBox(L"Error Reading Pixel Shader File", result, __FILE__, __LINE__);
 			return false;
 		}
+		
 		Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader = nullptr;
 		result = m_pDevice->CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), nullptr, &pPixelShader);
 		if (FAILED(result) == TRUE)
 		{
-			std::wstring errorString = L"ID3D11Device::CreatePixelShader: Failed";
-			MessageBox(nullptr, errorString.c_str(), L"Error creating pixel shader", MB_OK | MB_ICONEXCLAMATION);
+			PopUp::ErrorBox(L"Error Creating Pixel Shader Object", result, __FILE__, __LINE__);
 			return false;
 		}
 
@@ -218,16 +191,15 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = D3DReadFileToBlob(L"Source/SimpleVS.cso", &pVSBlob);
 		if (FAILED(result) == TRUE)
 		{
-			std::wstring errorString = L"D3DReadFileToBlob: Failed";
-			MessageBox(nullptr, errorString.c_str(), L"Error loading vertex shader", MB_OK | MB_ICONEXCLAMATION);
+			PopUp::ErrorBox(L"Error Reading Vertex Shader File", result, __FILE__, __LINE__);
 			return false;
 		}
+		
 		Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader = nullptr;
 		result = m_pDevice->CreateVertexShader(pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), nullptr, &pVertexShader);
 		if (FAILED(result) == TRUE)
 		{
-			std::wstring errorString = L"ID3D11Device::CreateVertexShader: Failed";
-			MessageBox(nullptr, errorString.c_str(), L"Error creating vertex shader", MB_OK | MB_ICONEXCLAMATION);
+			PopUp::ErrorBox(L"Error Creating Vertex Shader Object", result, __FILE__, __LINE__);
 			return false;
 		}
 
@@ -260,8 +232,7 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = m_pDevice->CreateBuffer(&bufferDescription, &bufferInitialData, &pVertexBuffer);
 		if (FAILED(result) == TRUE)
 		{
-			std::wstring errorString = L"ID3D11Device::CreateBuffer: Failed";
-			MessageBox(nullptr, errorString.c_str(), L"Error creating vertex buffer", MB_OK | MB_ICONEXCLAMATION);
+			PopUp::ErrorBox(L"Error Creating Vertex Buffer", result, __FILE__, __LINE__);
 			return false;
 		}
 
@@ -269,7 +240,6 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		const UINT stride = sizeof(Vertex);
 		const UINT offset = 0u;
 		m_pContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
-
 	}
 
 
@@ -298,8 +268,7 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = m_pDevice->CreateBuffer(&bufferDescription, &bufferInitialData, &pIndexBuffer);
 		if (FAILED(result) == TRUE)
 		{
-			std::wstring errorString = L"ID3D11Device::CreateBuffer: Failed";
-			MessageBox(nullptr, errorString.c_str(), L"Error creating index buffer", MB_OK | MB_ICONEXCLAMATION);
+			PopUp::ErrorBox(L"Error Creating Index Buffer", result, __FILE__, __LINE__);
 			return false;
 		}
 
@@ -339,9 +308,15 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		};
 
 		Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
-		result = m_pDevice->CreateInputLayout(inputElementDescription, std::size(inputElementDescription), pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), &pInputLayout);
-		m_pContext->IASetInputLayout(pInputLayout.Get());
+		result = m_pDevice->CreateInputLayout(inputElementDescription, (UINT)std::size(inputElementDescription), pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), &pInputLayout);
+		if (FAILED(result) == TRUE)
+		{
+			PopUp::ErrorBox(L"Error Creating Input Layout Object", result, __FILE__, __LINE__);
+			return false;
+		}
 
+		m_pContext->IASetInputLayout(pInputLayout.Get());
+		
 		m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 
@@ -385,8 +360,7 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = m_pDevice->CreateBuffer(&bufferDescription, &bufferInitialData, &pConstantBuffer);
 		if (FAILED(result) == TRUE)
 		{
-			std::wstring errorString = L"ID3D11Device::CreateBuffer: Failed";
-			MessageBox(nullptr, errorString.c_str(), L"Error creating constant buffer", MB_OK | MB_ICONEXCLAMATION);
+			PopUp::ErrorBox(L"Error Creating Constant Buffer Object", result, __FILE__, __LINE__);
 			return false;
 		}
 
@@ -422,13 +396,11 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 	/// Issue draw command
 	{
 		dxgiInfoManager.Mark();
-		m_pContext->DrawIndexed(std::size(indices), 0u, 0u);
-		std::vector<std::string> messages = dxgiInfoManager.GetMessages();
-		if (!messages.empty())
-		{
-			std::wstring errorString = L"Errors(" + std::to_wstring(messages.size()) + L"):\n\n";
-			for (auto& line : messages) errorString += std::wstring(line.begin(), line.end()) + L"\n\n";
-			MessageBox(nullptr, errorString.c_str(), L"ID3D11DeviceContext::Draw: Failed", MB_OK | MB_ICONEXCLAMATION);
+		m_pContext->DrawIndexed((UINT)std::size(indices), 0u, 0u);
+		std::vector<std::string> errorMessages = dxgiInfoManager.GetMessages();
+		if (!errorMessages.empty())
+		{	
+			PopUp::ErrorBox(L"Error Issuing Draw Command", errorMessages, __FILE__, __LINE__);
 			return false;
 		}
 	}
@@ -454,18 +426,30 @@ Microsoft::WRL::ComPtr<ID3D11DeviceContext> Graphics::GetContext() const
 
 void Graphics::SetDevice(Microsoft::WRL::ComPtr<ID3D11Device> ppDevice) noexcept
 {
+	if (m_pDevice)
+		m_pDevice->Release();
+
 	m_pDevice = ppDevice;
 }
 void Graphics::SetSwapChain(Microsoft::WRL::ComPtr<IDXGISwapChain> ppSwapChain) noexcept
 {
+	if (m_pSwapChain)
+		m_pSwapChain->Release();
+
 	m_pSwapChain = ppSwapChain;
 }
 void Graphics::SetContext(Microsoft::WRL::ComPtr<ID3D11DeviceContext> ppContext) noexcept
 {
+	if (m_pContext)
+		m_pContext->Release();
+
 	m_pContext = ppContext;
 }
 
 void Graphics::SetBackBufferRTV(Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pBackBufferRTV) noexcept
 {
+	if (m_pBackBufferRTV)
+		m_pBackBufferRTV->Release();
+
 	m_pBackBufferRTV = pBackBufferRTV;
 }

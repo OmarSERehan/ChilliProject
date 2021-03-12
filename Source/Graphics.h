@@ -5,6 +5,7 @@
 #include <d3dcompiler.h>
 #include <wrl.h>
 
+#include "PopUp.h"
 #include "WinHeader.h"
 #include "DxgiInfoManager.h"
 

@@ -36,8 +36,7 @@ std::shared_ptr<Window> Window::CreateObject(
 	BOOL result = AdjustWindowRect(&windowRegion, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
 	if (!result)
 	{
-		std::wstring errorString = std::to_wstring(GetLastError());
-		MessageBox(nullptr, errorString.c_str(), L"Error adjusting window rectangle", MB_OK | MB_ICONEXCLAMATION);
+		PopUp::ErrorBox(L"Error Adjusting Window Rectangle", GetLastError(), __FILE__, __LINE__);
 		return nullptr;
 	}
 
@@ -57,8 +56,7 @@ std::shared_ptr<Window> Window::CreateObject(
 	);
 	if (!windowHandle)
 	{
-		std::wstring errorString = std::to_wstring(GetLastError());
-		MessageBox(nullptr, errorString.c_str(), L"Error creating window", MB_OK | MB_ICONEXCLAMATION);
+		PopUp::ErrorBox(L"Error creating window", GetLastError(), __FILE__, __LINE__);
 		return nullptr;
 	}
 	
@@ -71,6 +69,7 @@ std::shared_ptr<Window> Window::CreateObject(
 	
 	pWindow->SetKeyboard(std::make_shared<Keyboard>());
 	pWindow->SetMouse(std::make_shared<Mouse>());
+	
 	if (!pGraphics)
 	{
 		pGraphics = Graphics::CreateObject(windowHandle);
@@ -84,14 +83,6 @@ std::shared_ptr<Window> Window::CreateObject(
 
 bool Window::DestroyObject() noexcept
 {
-	BOOL result = DestroyWindow(m_handle);
-	if (!result)
-	{
-		std::wstring errorString = std::to_wstring(GetLastError());
-		MessageBox(nullptr, errorString.c_str(), L"Error destroying window", MB_OK | MB_ICONEXCLAMATION);
-		return false;
-	}
-
 	return m_pWindowClass->DestroyObject();
 }
 
@@ -119,23 +110,21 @@ bool Window::Hide() const noexcept
 	return true;
 }
 
-std::optional<int32_t> Window::ProcessMessages() noexcept
+std::optional<uint64_t> Window::ProcessMessages() noexcept
 {
 	MSG message;
-
 	while (PeekMessage(&message, nullptr, NULL, NULL, PM_REMOVE))
 	{
 		if (message.message == WM_QUIT)
 		{
-			return static_cast<int32_t>(message.wParam);
+			return static_cast<uint64_t>(message.wParam);
 		}
 
 		TranslateMessage(&message);
 		DispatchMessage(&message);
-		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
-	return {};
+	return std::nullopt;
 }
 LRESULT Window::HandleMessage(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -144,10 +133,16 @@ LRESULT Window::HandleMessage(HWND windowHandle, UINT message, WPARAM wParam, LP
 	/// Window Events
 	{
 	case WM_CLOSE:
-		PostQuitMessage(0);
-		break;
+		if (MessageBox(m_handle, L"Are you sure you want to close the app?", L"Close Window", MB_YESNOCANCEL) == IDYES)
+			DestroyWindow(m_handle);
+		return NULL;
+
 	case WM_KILLFOCUS:
 		m_pKeyboard->ClearKeysStates();
+		break;
+
+	case WM_DESTROY:
+		PostQuitMessage(0);
 		break;
 	}
 
