@@ -55,7 +55,7 @@ bool Application::Frame() noexcept
 	{
 		return false;
 	}
-	if (!m_pWindow->GetGraphics()->DrawTestTriangle(
+	if (!m_pWindow->GetGraphics()->DrawTestCube(
 		m_pTimer->Peek(), 
 		2.0f * m_pWindow->GetMouse()->GetXPosition() / m_pWindow->GetWidth() - 1.0f, 
 		-2.0f * m_pWindow->GetMouse()->GetYPosition() / m_pWindow->GetHeight() + 1.0f
