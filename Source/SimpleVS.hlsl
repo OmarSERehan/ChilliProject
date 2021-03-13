@@ -7,7 +7,7 @@ struct VSOut
 
 cbuffer constBuffer
 {
-	row_major matrix transform;
+	matrix transform;
 };
 
 VSOut main(float2 iPosition : POSITION0, float4 iColor : COLOR0)

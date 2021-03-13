@@ -33,14 +33,11 @@ std::shared_ptr<WindowAPIClass> WindowAPIClass::CreateObject(LPCWSTR className, 
 
 	return pWindowClass;
 }
-
 bool WindowAPIClass::DestroyObject() const noexcept
 {
-	ATOM result = UnregisterClass(m_pName, m_applicationHandle);
-	if (!result)
+	if (!UnregisterClass(m_pName, m_applicationHandle))
 	{
-		std::wstring errorCode = std::to_wstring(GetLastError());
-		MessageBox(nullptr, errorCode.c_str(), L"Error unregistering window class", MB_OK | MB_ICONEXCLAMATION);
+		ErrorHandler::ErrorBox(L"Error Unregistering Window Class from WIN32 API", GetLastError(), __FILE__, __LINE__);
 		return false;
 	}
 

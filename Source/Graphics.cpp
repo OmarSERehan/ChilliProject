@@ -62,7 +62,7 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 	);
 	if (FAILED(result) == TRUE)
 	{
-		PopUp::ErrorBox(L"Error Creating Device/SwapChain/DeviceContext", result, __FILE__, __LINE__);
+		ErrorHandler::ErrorBox(L"Error Creating Device/SwapChain/DeviceContext", result, __FILE__, __LINE__);
 		return nullptr;
 	}
 
@@ -77,7 +77,7 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 		result = pGraphics->GetSwapChain()->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer);
 		if (FAILED(result) == TRUE)
 		{
-			PopUp::ErrorBox(L"Error Creating Buffer", result, __FILE__, __LINE__);
+			ErrorHandler::ErrorBox(L"Error Creating Buffer", result, __FILE__, __LINE__);
 			return nullptr;
 		}
 
@@ -86,7 +86,7 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 		result = pGraphics->GetDevice()->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &pRTV);
 		if (FAILED(result) == TRUE)
 		{
-			PopUp::ErrorBox(L"Error Creating Render Target View", result, __FILE__, __LINE__);
+			ErrorHandler::ErrorBox(L"Error Creating Render Target View", result, __FILE__, __LINE__);
 			return nullptr;
 		}
 		pGraphics->SetBackBufferRTV(pRTV);
@@ -135,7 +135,7 @@ bool Graphics::ClearBackBuffer(float r, float g, float b) noexcept
 	m_pContext->ClearRenderTargetView(m_pBackBufferRTV.Get(), color);
 	return true;
 }
-bool Graphics::DrawTestTriangle(float angle) noexcept
+bool Graphics::DrawTestTriangle(float angle, float x, float y) noexcept
 {
 	HRESULT result;
 
@@ -169,7 +169,7 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = D3DReadFileToBlob(L"Source/SimplePS.cso", &pPSBlob);
 		if (FAILED(result) == TRUE)
 		{
-			PopUp::ErrorBox(L"Error Reading Pixel Shader File", result, __FILE__, __LINE__);
+			ErrorHandler::ErrorBox(L"Error Reading Pixel Shader File", result, __FILE__, __LINE__);
 			return false;
 		}
 		
@@ -177,7 +177,7 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = m_pDevice->CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), nullptr, &pPixelShader);
 		if (FAILED(result) == TRUE)
 		{
-			PopUp::ErrorBox(L"Error Creating Pixel Shader Object", result, __FILE__, __LINE__);
+			ErrorHandler::ErrorBox(L"Error Creating Pixel Shader Object", result, __FILE__, __LINE__);
 			return false;
 		}
 
@@ -191,7 +191,7 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = D3DReadFileToBlob(L"Source/SimpleVS.cso", &pVSBlob);
 		if (FAILED(result) == TRUE)
 		{
-			PopUp::ErrorBox(L"Error Reading Vertex Shader File", result, __FILE__, __LINE__);
+			ErrorHandler::ErrorBox(L"Error Reading Vertex Shader File", result, __FILE__, __LINE__);
 			return false;
 		}
 		
@@ -199,7 +199,7 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = m_pDevice->CreateVertexShader(pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), nullptr, &pVertexShader);
 		if (FAILED(result) == TRUE)
 		{
-			PopUp::ErrorBox(L"Error Creating Vertex Shader Object", result, __FILE__, __LINE__);
+			ErrorHandler::ErrorBox(L"Error Creating Vertex Shader Object", result, __FILE__, __LINE__);
 			return false;
 		}
 
@@ -232,7 +232,7 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = m_pDevice->CreateBuffer(&bufferDescription, &bufferInitialData, &pVertexBuffer);
 		if (FAILED(result) == TRUE)
 		{
-			PopUp::ErrorBox(L"Error Creating Vertex Buffer", result, __FILE__, __LINE__);
+			ErrorHandler::ErrorBox(L"Error Creating Vertex Buffer", result, __FILE__, __LINE__);
 			return false;
 		}
 
@@ -268,7 +268,7 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = m_pDevice->CreateBuffer(&bufferDescription, &bufferInitialData, &pIndexBuffer);
 		if (FAILED(result) == TRUE)
 		{
-			PopUp::ErrorBox(L"Error Creating Index Buffer", result, __FILE__, __LINE__);
+			ErrorHandler::ErrorBox(L"Error Creating Index Buffer", result, __FILE__, __LINE__);
 			return false;
 		}
 
@@ -311,7 +311,7 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = m_pDevice->CreateInputLayout(inputElementDescription, (UINT)std::size(inputElementDescription), pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), &pInputLayout);
 		if (FAILED(result) == TRUE)
 		{
-			PopUp::ErrorBox(L"Error Creating Input Layout Object", result, __FILE__, __LINE__);
+			ErrorHandler::ErrorBox(L"Error Creating Input Layout Object", result, __FILE__, __LINE__);
 			return false;
 		}
 
@@ -321,20 +321,20 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 	}
 
 
-	/// Create Transforation Matrix Constant Buffer
+	/// Create Transformation Matrix Constant Buffer
 	{
 		struct ConstantBuffer {
-			struct { float matrix[4][4]; } Transformation;
+			DirectX::XMMATRIX transform;
 		};
 
 		const ConstantBuffer constBuffer
 		{
-			{ // Rotation Matrix
-				m_inverseAspectRatio * +std::cos(angle),	+std::sin(angle),	0.0f,	0.0f,
-				m_inverseAspectRatio * -std::sin(angle),	+std::cos(angle),	0.0f,	0.0f,
-				+0.0f,										0.0f,				1.0f,	0.0f,
-				+0.0f,										0.0f,				0.0f,	1.0f
-			}
+			DirectX::XMMatrixTranspose(
+				DirectX::XMMatrixMultiply(
+					DirectX::XMMatrixRotationZ(angle),
+					DirectX::XMMatrixTranslation(x, y, 0.0f)
+				)
+			)
 		};
 	
 		D3D11_SUBRESOURCE_DATA bufferInitialData;
@@ -360,7 +360,7 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		result = m_pDevice->CreateBuffer(&bufferDescription, &bufferInitialData, &pConstantBuffer);
 		if (FAILED(result) == TRUE)
 		{
-			PopUp::ErrorBox(L"Error Creating Constant Buffer Object", result, __FILE__, __LINE__);
+			ErrorHandler::ErrorBox(L"Error Creating Constant Buffer Object", result, __FILE__, __LINE__);
 			return false;
 		}
 
@@ -399,8 +399,8 @@ bool Graphics::DrawTestTriangle(float angle) noexcept
 		m_pContext->DrawIndexed((UINT)std::size(indices), 0u, 0u);
 		std::vector<std::string> errorMessages = dxgiInfoManager.GetMessages();
 		if (!errorMessages.empty())
-		{	
-			PopUp::ErrorBox(L"Error Issuing Draw Command", errorMessages, __FILE__, __LINE__);
+		{
+			ErrorHandler::ErrorBox(L"Error Issuing Draw Command", errorMessages, __FILE__, __LINE__);
 			return false;
 		}
 	}

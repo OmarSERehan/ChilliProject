@@ -4,7 +4,7 @@
 #include <optional>
 #include <functional>
 
-#include "PopUp.h"
+#include "ErrorHandler.h"
 #include "WindowAPIClass.h"
 #include "Keyboard.h"
 #include "Mouse.h"
@@ -36,6 +36,8 @@ public:
 	std::shared_ptr<Keyboard> GetKeyboard() const noexcept;
 	std::shared_ptr<Mouse> GetMouse() const noexcept;
 	std::shared_ptr<Graphics> GetGraphics() const noexcept;
+	int32_t GetWidth() const noexcept;
+	int32_t GetHeight() const noexcept;
 
 
 private:

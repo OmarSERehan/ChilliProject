@@ -1,11 +1,11 @@
 #pragma once
 #include <memory>
-#include <iostream>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <wrl.h>
+#include <DirectXMath.h>
 
-#include "PopUp.h"
+#include "ErrorHandler.h"
 #include "WinHeader.h"
 #include "DxgiInfoManager.h"
 
@@ -18,7 +18,7 @@ public:
 	bool SwapFrames() noexcept;
 	
 	bool ClearBackBuffer(float r, float g, float b) noexcept;
-	bool DrawTestTriangle(float angle) noexcept;
+	bool DrawTestTriangle(float angle, float x, float y) noexcept;
 
 
 	Microsoft::WRL::ComPtr<ID3D11Device> GetDevice() const;

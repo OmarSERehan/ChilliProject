@@ -4,6 +4,7 @@
 #include <functional>
 
 #include "WinHeader.h"
+#include "ErrorHandler.h"
 #include "../resource.h"
 
 

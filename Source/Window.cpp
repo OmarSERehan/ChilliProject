@@ -36,7 +36,7 @@ std::shared_ptr<Window> Window::CreateObject(
 	BOOL result = AdjustWindowRect(&windowRegion, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE);
 	if (!result)
 	{
-		PopUp::ErrorBox(L"Error Adjusting Window Rectangle", GetLastError(), __FILE__, __LINE__);
+		ErrorHandler::ErrorBox(L"Error Adjusting Window Rectangle", GetLastError(), __FILE__, __LINE__);
 		return nullptr;
 	}
 
@@ -56,7 +56,7 @@ std::shared_ptr<Window> Window::CreateObject(
 	);
 	if (!windowHandle)
 	{
-		PopUp::ErrorBox(L"Error creating window", GetLastError(), __FILE__, __LINE__);
+		ErrorHandler::ErrorBox(L"Error creating window", GetLastError(), __FILE__, __LINE__);
 		return nullptr;
 	}
 	
@@ -83,6 +83,11 @@ std::shared_ptr<Window> Window::CreateObject(
 
 bool Window::DestroyObject() noexcept
 {
+	if (IsWindow(m_handle))
+	{
+		DestroyWindow(m_handle);
+	}
+
 	return m_pWindowClass->DestroyObject();
 }
 
@@ -247,6 +252,14 @@ std::shared_ptr<Mouse> Window::GetMouse() const noexcept
 std::shared_ptr<Graphics> Window::GetGraphics() const noexcept
 {
 	return m_pGraphics;
+}
+int32_t Window::GetWidth() const noexcept
+{
+	return m_width;
+}
+int32_t Window::GetHeight() const noexcept
+{
+	return m_height;
 }
 
 
