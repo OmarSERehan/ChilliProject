@@ -55,14 +55,20 @@ bool Application::Frame() noexcept
 	{
 		return false;
 	}
-	if (!m_pWindow->GetGraphics()->DrawTestCube(
-		m_pTimer->Peek(), 
-		2.0f * m_pWindow->GetMouse()->GetXPosition() / m_pWindow->GetWidth() - 1.0f, 
-		-2.0f * m_pWindow->GetMouse()->GetYPosition() / m_pWindow->GetHeight() + 1.0f
-	))
+	
+	if (!m_pWindow->GetGraphics()->DrawTestCube(0.0f, 0.0f, 0.0f))
 	{
 		return false;
 	}
+
+	float xPos = 2.0f * m_pWindow->GetMouse()->GetXPosition() / m_pWindow->GetWidth() - 1.0f;
+	float yPos = -2.0f * m_pWindow->GetMouse()->GetYPosition() / m_pWindow->GetHeight() + 1.0f;
+	
+	if (!m_pWindow->GetGraphics()->DrawTestCube(m_pTimer->Peek(), xPos, yPos))
+	{
+		return false;
+	}
+
 	if (!m_pWindow->GetGraphics()->SwapFrames())
 	{
 		return false;

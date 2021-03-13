@@ -6,6 +6,11 @@
 
 #include "WinHeader.h"
 
+/*
+_RPTFN(_CRT_WARN, "Mouse position: (%d, %d)\n", xPos, yPos);
+*/
+
+
 class ErrorHandler
 {
 public:

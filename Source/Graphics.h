@@ -33,13 +33,17 @@ private:
 	void SetDevice(Microsoft::WRL::ComPtr<ID3D11Device> pDevice) noexcept;
 	void SetSwapChain(Microsoft::WRL::ComPtr<IDXGISwapChain> pSwapChain) noexcept;
 	void SetContext(Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext) noexcept;
+	
 	void SetBackBufferRTV(Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pBackBufferRTV) noexcept;
+	void SetDepthBufferDSV(Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepthBufferDSV) noexcept;
+
 
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice = nullptr;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> m_pSwapChain = nullptr;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_pContext = nullptr;
 
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_pBackBufferRTV = nullptr;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_pDepthBufferDSV = nullptr;
 
 #ifndef NDEBUG
 	DxgiInfoManager dxgiInfoManager;

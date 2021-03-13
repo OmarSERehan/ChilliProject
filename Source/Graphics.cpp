@@ -24,7 +24,7 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 		swapChainDescription.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 		swapChainDescription.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 		swapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // frame buffer
-		swapChainDescription.BufferCount = 2/*1*/; // num of back buffers
+		swapChainDescription.BufferCount = 1; // num of back buffers
 
 		/// antialiasing data
 		swapChainDescription.SampleDesc.Count = 1;
@@ -35,7 +35,7 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 		swapChainDescription.Windowed = TRUE;
 
 		/// miscellaneous
-		swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;/* DXGI_SWAP_EFFECT_DISCARD;*/
+		swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		swapChainDescription.Flags = NULL;
 	}
 
@@ -55,8 +55,8 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 		NULL,						// allowed feature levels
 		D3D11_SDK_VERSION,			// targeted direct3d sdk version
 		&swapChainDescription,		// swap chain configurations
-		&pSwapChain,	// output pointer to swap chain
-		&pDevice,		// output pointer to device
+		&pSwapChain,				// output pointer to swap chain
+		&pDevice,					// output pointer to device
 		nullptr,					// output pointer with chosen feature level
 		&pContext		// output pointer to context
 	);
@@ -72,6 +72,7 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 
 
 	/// Create render target view of the back buffer in the swap chain
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pRTV = nullptr;
 	{
 		Microsoft::WRL::ComPtr<ID3D11Resource> pBackBuffer = nullptr;
 		result = pGraphics->GetSwapChain()->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer);
@@ -82,7 +83,6 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 		}
 
 		/// create render target view using the back buffer (must've been created as a render target)
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pRTV = nullptr;
 		result = pGraphics->GetDevice()->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &pRTV);
 		if (FAILED(result) == TRUE)
 		{
@@ -91,6 +91,86 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 		}
 		pGraphics->SetBackBufferRTV(pRTV);
 	}
+
+
+	/// Create depth/stencil buffer (z-buffer or texture) & Create target view of the buffer
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDSV = nullptr;
+	{
+		/// Create & Bind depth/stencil state
+		{
+			D3D11_DEPTH_STENCIL_DESC dsStateDescription = {};
+			{
+				dsStateDescription.DepthEnable = TRUE;
+				dsStateDescription.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+				dsStateDescription.DepthFunc = D3D11_COMPARISON_LESS;
+
+				//dsStateDescription.StencilEnable = FALSE;
+				//dsStateDescription.StencilReadMask = NULL;
+				//dsStateDescription.StencilWriteMask = NULL;
+			}
+
+			Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDsState;
+			result = pGraphics->GetDevice()->CreateDepthStencilState(&dsStateDescription, &pDsState);
+			if (FAILED(result) == TRUE)
+			{
+				ErrorHandler::ErrorBox(L"Error Creating depth/stencil buffer", result, __FILE__, __LINE__);
+				return nullptr;
+			}
+
+			pGraphics->GetContext()->OMSetDepthStencilState(pDsState.Get(), 1u);
+		}
+
+		/// Create depth/stencil buffer
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> pDsBuffer;
+		{
+			D3D11_TEXTURE2D_DESC dsBufferDescription = {};
+			{
+				dsBufferDescription.Format = DXGI_FORMAT_D32_FLOAT;
+
+				dsBufferDescription.Usage = D3D11_USAGE_DEFAULT;
+				dsBufferDescription.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+				dsBufferDescription.CPUAccessFlags = NULL;
+				dsBufferDescription.MiscFlags = NULL;
+
+				dsBufferDescription.Width = 800u;		// same as swap chain back buffer
+				dsBufferDescription.Height = 600u;		// same as swap chain back buffer
+
+				dsBufferDescription.MipLevels = 1u;
+				dsBufferDescription.ArraySize = 1u;		// number of 2D textures created
+
+				/// anti-aliasing bs
+				dsBufferDescription.SampleDesc.Count = 1u;
+				dsBufferDescription.SampleDesc.Quality = 0u;
+			}
+
+			pGraphics->GetDevice()->CreateTexture2D(&dsBufferDescription, nullptr, &pDsBuffer);
+		}
+
+		/// Create target view of the depth/stencil buffer (must've been created as a depth/stencil buffer)
+		{
+			D3D11_DEPTH_STENCIL_VIEW_DESC dsvDescription = {};
+			{
+				dsvDescription.Format = DXGI_FORMAT_D32_FLOAT;
+				dsvDescription.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+				dsvDescription.Flags = 0u;
+				
+				dsvDescription.Texture2D.MipSlice = 0u;
+			}
+
+			result = pGraphics->GetDevice()->CreateDepthStencilView(pDsBuffer.Get(), &dsvDescription, &pDSV);
+			if (FAILED(result) == TRUE)
+			{
+				ErrorHandler::ErrorBox(L"Error Creating Depth Stencil View", result, __FILE__, __LINE__);
+				return nullptr;
+			}
+			pGraphics->SetDepthBufferDSV(pDSV);
+		}
+	}
+
+
+	/// Bind render target view & depth stencil view to the pipeline
+	pGraphics->GetContext()->OMSetRenderTargets(1u, pRTV.GetAddressOf(), pDSV.Get());
 
 
 	return pGraphics;
@@ -133,6 +213,8 @@ bool Graphics::ClearBackBuffer(float r, float g, float b) noexcept
 {
 	const float color[] = { r, g, b, 1.0f };
 	m_pContext->ClearRenderTargetView(m_pBackBufferRTV.Get(), color);
+	m_pContext->ClearDepthStencilView(m_pDepthBufferDSV.Get(), D3D11_CLEAR_DEPTH, 1u, 0u);
+	
 	return true;
 }
 bool Graphics::DrawTestTriangle(float angle, float x, float y) noexcept
@@ -215,7 +297,7 @@ bool Graphics::DrawTestTriangle(float angle, float x, float y) noexcept
 		}
 
 		/// Data about the buffer (as a whole) we want to create
-		D3D11_BUFFER_DESC bufferDescription;
+		D3D11_BUFFER_DESC bufferDescription = {};
 		{
 			bufferDescription.Usage = D3D11_USAGE_DEFAULT;
 			bufferDescription.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -251,7 +333,7 @@ bool Graphics::DrawTestTriangle(float angle, float x, float y) noexcept
 		}
 
 		/// Data about the buffer (as a whole) we want to create
-		D3D11_BUFFER_DESC bufferDescription;
+		D3D11_BUFFER_DESC bufferDescription = {};
 		{
 			bufferDescription.Usage = D3D11_USAGE_DEFAULT;
 			bufferDescription.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -343,7 +425,7 @@ bool Graphics::DrawTestTriangle(float angle, float x, float y) noexcept
 		}
 
 		/// Data about the buffer (as a whole) we want to create
-		D3D11_BUFFER_DESC bufferDescription;
+		D3D11_BUFFER_DESC bufferDescription = {};
 		{
 			bufferDescription.Usage = D3D11_USAGE_DYNAMIC;
 			bufferDescription.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -366,12 +448,6 @@ bool Graphics::DrawTestTriangle(float angle, float x, float y) noexcept
 
 		/// Bind buffer to render pipeline
 		m_pContext->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
-	}
-
-
-	/// Bind Render Target
-	{
-		m_pContext->OMSetRenderTargets(1u, m_pBackBufferRTV.GetAddressOf(), nullptr);
 	}
 
 
@@ -504,7 +580,7 @@ bool Graphics::DrawTestCube(float angle, float x, float y) noexcept
 		}
 
 		/// Data about the buffer (as a whole) we want to create
-		D3D11_BUFFER_DESC bufferDescription;
+		D3D11_BUFFER_DESC bufferDescription = {};
 		{
 			bufferDescription.Usage = D3D11_USAGE_DEFAULT;
 			bufferDescription.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -540,7 +616,7 @@ bool Graphics::DrawTestCube(float angle, float x, float y) noexcept
 		}
 
 		/// Data about the buffer (as a whole) we want to create
-		D3D11_BUFFER_DESC bufferDescription;
+		D3D11_BUFFER_DESC bufferDescription = {};
 		{
 			bufferDescription.Usage = D3D11_USAGE_DEFAULT;
 			bufferDescription.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -609,7 +685,7 @@ bool Graphics::DrawTestCube(float angle, float x, float y) noexcept
 			DirectX::XMMatrixTranspose(
 				DirectX::XMMatrixRotationZ(angle) *
 				DirectX::XMMatrixRotationX(angle)*
-				DirectX::XMMatrixTranslation(x, y, 4.0f) *
+				DirectX::XMMatrixTranslation(x, 0.0f, y + 4.0f) *
 				DirectX::XMMatrixPerspectiveLH(1.0f, m_inverseAspectRatio, 0.5f, 10.0f)
 			)
 		};
@@ -620,7 +696,7 @@ bool Graphics::DrawTestCube(float angle, float x, float y) noexcept
 		}
 
 		/// Data about the buffer (as a whole) we want to create
-		D3D11_BUFFER_DESC bufferDescription;
+		D3D11_BUFFER_DESC bufferDescription = {};
 		{
 			bufferDescription.Usage = D3D11_USAGE_DYNAMIC;
 			bufferDescription.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -670,10 +746,10 @@ bool Graphics::DrawTestCube(float angle, float x, float y) noexcept
 		}
 
 		/// Data about the buffer (as a whole) we want to create
-		D3D11_BUFFER_DESC bufferDescription;
+		D3D11_BUFFER_DESC bufferDescription = {};
 		{
-			bufferDescription.Usage = D3D11_USAGE_DEFAULT;
-			bufferDescription.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+			bufferDescription.Usage = D3D11_USAGE_DYNAMIC;
+			bufferDescription.BindFlags = D3D10_BIND_CONSTANT_BUFFER;
 
 			bufferDescription.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; // dynamic usage
 			bufferDescription.MiscFlags = NULL;
@@ -693,12 +769,6 @@ bool Graphics::DrawTestCube(float angle, float x, float y) noexcept
 
 		/// Bind buffer to render pipeline
 		m_pContext->PSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
-	}
-
-
-	/// Bind Render Target
-	{
-		m_pContext->OMSetRenderTargets(1u, m_pBackBufferRTV.GetAddressOf(), nullptr);
 	}
 
 
@@ -778,4 +848,11 @@ void Graphics::SetBackBufferRTV(Microsoft::WRL::ComPtr<ID3D11RenderTargetView> p
 		m_pBackBufferRTV->Release();
 
 	m_pBackBufferRTV = pBackBufferRTV;
+}
+void Graphics::SetDepthBufferDSV(Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepthBufferDSV) noexcept
+{
+	if (m_pDepthBufferDSV)
+		m_pDepthBufferDSV->Release();
+
+	m_pDepthBufferDSV = pDepthBufferDSV;
 }
