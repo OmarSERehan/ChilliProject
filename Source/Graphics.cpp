@@ -486,14 +486,13 @@ bool Graphics::DrawTestTriangle(float angle, float x, float y) noexcept
 }
 bool Graphics::DrawTestCube(float angle, float x, float y) noexcept
 {
-	HRESULT result;
-
 	/// Actual vertices data
 	struct Vertex
 	{
 		struct { float x, y, z; } Position;
 		struct { unsigned char r, g, b, a; } Color;
 	};
+	
 	const Vertex vertices[]
 	{
 		{ -1.0f, -1.0f, -1.0f},
@@ -531,7 +530,7 @@ bool Graphics::DrawTestCube(float angle, float x, float y) noexcept
 	/// Load & bind Pixel Shader to pipeline
 	{
 		Microsoft::WRL::ComPtr<ID3DBlob> pPSBlob = nullptr;
-		result = D3DReadFileToBlob(L"Source/SimpleCubePS.cso", &pPSBlob);
+		HRESULT result = D3DReadFileToBlob(L"Source/SimpleCubePS.cso", &pPSBlob);
 		if (FAILED(result) == TRUE)
 		{
 			ErrorHandler::ErrorBox(L"Error Reading Pixel Shader File", result, __FILE__, __LINE__);
@@ -553,7 +552,7 @@ bool Graphics::DrawTestCube(float angle, float x, float y) noexcept
 	/// Load & bind Vertex Shader to pipeline
 	Microsoft::WRL::ComPtr<ID3DBlob> pVSBlob = nullptr;
 	{
-		result = D3DReadFileToBlob(L"Source/SimpleCubeVS.cso", &pVSBlob);
+		HRESULT result = D3DReadFileToBlob(L"Source/SimpleCubeVS.cso", &pVSBlob);
 		if (FAILED(result) == TRUE)
 		{
 			ErrorHandler::ErrorBox(L"Error Reading Vertex Shader File", result, __FILE__, __LINE__);
@@ -572,204 +571,34 @@ bool Graphics::DrawTestCube(float angle, float x, float y) noexcept
 	}
 
 
-	/// Create & Bind Vertex Buffer
+	struct TransformationMatrix {
+		DirectX::XMMATRIX transform;
+	};
+	const TransformationMatrix vConstBuffer
 	{
-		D3D11_SUBRESOURCE_DATA bufferInitialData;
-		{
-			bufferInitialData.pSysMem = vertices;
-		}
-
-		/// Data about the buffer (as a whole) we want to create
-		D3D11_BUFFER_DESC bufferDescription = {};
-		{
-			bufferDescription.Usage = D3D11_USAGE_DEFAULT;
-			bufferDescription.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-			bufferDescription.CPUAccessFlags = NULL;
-			bufferDescription.MiscFlags = NULL;
-
-			bufferDescription.StructureByteStride = sizeof(Vertex);
-			bufferDescription.ByteWidth = sizeof(vertices);
-		}
-
-		/// Create vertex buffer
-		Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer = nullptr;
-		result = m_pDevice->CreateBuffer(&bufferDescription, &bufferInitialData, &pVertexBuffer);
-		if (FAILED(result) == TRUE)
-		{
-			ErrorHandler::ErrorBox(L"Error Creating Vertex Buffer", result, __FILE__, __LINE__);
-			return false;
-		}
-
-		/// Bind buffer to render pipeline
-		const UINT stride = sizeof(Vertex);
-		const UINT offset = 0u;
-		m_pContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
-	}
+		DirectX::XMMatrixTranspose(
+			DirectX::XMMatrixRotationZ(angle) *
+			DirectX::XMMatrixRotationX(angle) *
+			DirectX::XMMatrixTranslation(x, 0.0f, y + 4.0f) *
+			DirectX::XMMatrixPerspectiveLH(1.0f, m_inverseAspectRatio, 0.5f, 10.0f)
+		)
+	};
 
 
-	/// Create & Bind Index Buffer
+	struct ColorArray {
+		struct { float r, g, b, a; } faceColors[6];
+	};
+	const ColorArray pConstBuffer
 	{
-		D3D11_SUBRESOURCE_DATA bufferInitialData;
 		{
-			bufferInitialData.pSysMem = indices;
+			{ 1.0f, 0.0f, 0.0f },
+			{ 0.0f, 1.0f, 0.0f },
+			{ 0.0f, 0.0f, 1.0f },
+			{ 1.0f, 1.0f, 0.0f },
+			{ 1.0f, 0.0f, 1.0f },
+			{ 0.0f, 1.0f, 1.0f }
 		}
-
-		/// Data about the buffer (as a whole) we want to create
-		D3D11_BUFFER_DESC bufferDescription = {};
-		{
-			bufferDescription.Usage = D3D11_USAGE_DEFAULT;
-			bufferDescription.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
-			bufferDescription.CPUAccessFlags = NULL;
-			bufferDescription.MiscFlags = NULL;
-
-			bufferDescription.StructureByteStride = sizeof(uint16_t);
-			bufferDescription.ByteWidth = sizeof(indices);
-		}
-
-		/// Create index buffer
-		Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer = nullptr;
-		result = m_pDevice->CreateBuffer(&bufferDescription, &bufferInitialData, &pIndexBuffer);
-		if (FAILED(result) == TRUE)
-		{
-			ErrorHandler::ErrorBox(L"Error Creating Index Buffer", result, __FILE__, __LINE__);
-			return false;
-		}
-
-		/// Bind buffer to render pipeline
-		m_pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
-	}
-
-
-	/// Create & Set Input Layout
-	{
-		/// Specify how the data is laid out in the vertex buffer
-		D3D11_INPUT_ELEMENT_DESC inputElementDescription[]
-		{
-			{
-				"UV_Position",					// SemanticName (Vertex shader)
-				0,								// SemanticIndex (Vertex shader)
-
-				DXGI_FORMAT_R32G32B32_FLOAT,	// Format (3 floats)
-				0,								// InputSlot (keep it zero for now)
-				0,								// AlignedByteOffset
-
-				D3D11_INPUT_PER_VERTEX_DATA,	// InputSlotClass
-				NULL							// InstanceDataStepRate
-			}
-		};
-
-		Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
-		result = m_pDevice->CreateInputLayout(inputElementDescription, (UINT)std::size(inputElementDescription), pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), &pInputLayout);
-		if (FAILED(result) == TRUE)
-		{
-			ErrorHandler::ErrorBox(L"Error Creating Input Layout Object", result, __FILE__, __LINE__);
-			return false;
-		}
-
-		m_pContext->IASetInputLayout(pInputLayout.Get());
-
-		m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	}
-
-
-	/// Create Transformation Matrix Constant Buffer
-	{
-		struct ConstantBuffer {
-			DirectX::XMMATRIX transform;
-		};
-
-		const ConstantBuffer constBuffer
-		{
-			DirectX::XMMatrixTranspose(
-				DirectX::XMMatrixRotationZ(angle) *
-				DirectX::XMMatrixRotationX(angle)*
-				DirectX::XMMatrixTranslation(x, 0.0f, y + 4.0f) *
-				DirectX::XMMatrixPerspectiveLH(1.0f, m_inverseAspectRatio, 0.5f, 10.0f)
-			)
-		};
-
-		D3D11_SUBRESOURCE_DATA bufferInitialData;
-		{
-			bufferInitialData.pSysMem = &constBuffer;
-		}
-
-		/// Data about the buffer (as a whole) we want to create
-		D3D11_BUFFER_DESC bufferDescription = {};
-		{
-			bufferDescription.Usage = D3D11_USAGE_DYNAMIC;
-			bufferDescription.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-
-			bufferDescription.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; // dynamic usage
-			bufferDescription.MiscFlags = NULL;
-
-			bufferDescription.StructureByteStride = NULL; // not an array
-			bufferDescription.ByteWidth = sizeof(constBuffer);
-		}
-
-		/// Create constant buffer
-		Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer = nullptr;
-		result = m_pDevice->CreateBuffer(&bufferDescription, &bufferInitialData, &pConstantBuffer);
-		if (FAILED(result) == TRUE)
-		{
-			ErrorHandler::ErrorBox(L"Error Creating Constant Buffer Object", result, __FILE__, __LINE__);
-			return false;
-		}
-
-		/// Bind buffer to render pipeline
-		m_pContext->VSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
-	}
-
-
-	/// Create Color Array Constant Buffer
-	{
-		struct ConstantBuffer {
-			struct { float r, g, b, a; } faceColors[6];
-		};
-
-		const ConstantBuffer constBuffer
-		{
-			{
-				{ 1.0f, 0.0f, 0.0f },
-				{ 0.0f, 1.0f, 0.0f },
-				{ 0.0f, 0.0f, 1.0f },
-				{ 1.0f, 1.0f, 0.0f },
-				{ 1.0f, 0.0f, 1.0f },
-				{ 0.0f, 1.0f, 1.0f }
-			}
-		};
-
-		D3D11_SUBRESOURCE_DATA bufferInitialData;
-		{
-			bufferInitialData.pSysMem = &constBuffer;
-		}
-
-		/// Data about the buffer (as a whole) we want to create
-		D3D11_BUFFER_DESC bufferDescription = {};
-		{
-			bufferDescription.Usage = D3D11_USAGE_DYNAMIC;
-			bufferDescription.BindFlags = D3D10_BIND_CONSTANT_BUFFER;
-
-			bufferDescription.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; // dynamic usage
-			bufferDescription.MiscFlags = NULL;
-
-			bufferDescription.StructureByteStride = NULL; // not an array
-			bufferDescription.ByteWidth = sizeof(constBuffer);
-		}
-
-		/// Create constant buffer
-		Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer = nullptr;
-		result = m_pDevice->CreateBuffer(&bufferDescription, &bufferInitialData, &pConstantBuffer);
-		if (FAILED(result) == TRUE)
-		{
-			ErrorHandler::ErrorBox(L"Error Creating Constant Buffer Object", result, __FILE__, __LINE__);
-			return false;
-		}
-
-		/// Bind buffer to render pipeline
-		m_pContext->PSSetConstantBuffers(0u, 1u, pConstantBuffer.GetAddressOf());
-	}
+	};
 
 
 	/// Configure Viewport

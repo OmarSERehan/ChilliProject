@@ -6,8 +6,8 @@
 #include <DirectXMath.h>
 
 #include "ErrorHandler.h"
-#include "WinHeader.h"
 #include "DxgiInfoManager.h"
+#include "WinHeader.h"
 
 class Graphics
 {
