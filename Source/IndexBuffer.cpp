@@ -1,9 +1,9 @@
 #include "IndexBuffer.h"
 #include "Graphics.h"
 
-std::shared_ptr<IndexBuffer> IndexBuffer::CreateObject(Graphics* gfx, const std::vector<uint16_t>& indices) noexcept
+std::unique_ptr<IndexBuffer> IndexBuffer::CreateObject(Graphics* gfx, const std::vector<uint16_t>& indices) noexcept
 {
-	std::shared_ptr<IndexBuffer> pIndexBuffer = std::make_shared<IndexBuffer>();
+	std::unique_ptr<IndexBuffer> pIndexBuffer = std::make_unique<IndexBuffer>();
 	{
 		pIndexBuffer->SetCount(indices.size());
 	}
@@ -40,7 +40,7 @@ std::shared_ptr<IndexBuffer> IndexBuffer::CreateObject(Graphics* gfx, const std:
 	pIndexBuffer->SetBuffer(pBuffer);
 
 
-	return pIndexBuffer;
+	return std::move(pIndexBuffer);
 }
 bool IndexBuffer::DestroyObject() noexcept
 {

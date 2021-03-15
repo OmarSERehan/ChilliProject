@@ -13,6 +13,18 @@ std::shared_ptr<Application> Application::CreateObject(std::shared_ptr<Window> p
 	pApp->SetWindow(pWindow);
 	pApp->SetTimer(std::make_shared<Timer>());
 
+
+	std::mt19937 rng(std::random_device{}());
+	std::uniform_real_distribution<float> rDistribution(6.0f, 20.0f);
+	std::uniform_real_distribution<float> grDistribution(0.0f, 3.1415f * 2.0f);
+	std::uniform_real_distribution<float> laDistribution(0.0f, 3.1415f * 0.3f);
+	std::uniform_real_distribution<float> gaDistribution(0.0f, 3.1415f * 2.0f);
+	for (uint16_t i = 0u; i < 10; i++)
+	{
+		pApp->AddBox(Cube::CreateObject(pApp->GetWindow()->GetGraphics().get(), rng, rDistribution, grDistribution, laDistribution, gaDistribution));
+	}
+	pApp->GetWindow()->GetGraphics()->SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 0.75f, 0.1f, 10.0f));
+
 	return pApp;
 }
 void Application::DestroyObject() noexcept
@@ -49,24 +61,25 @@ void Application::SetTimer(std::shared_ptr<Timer> pTimer) noexcept
 }
 
 
+std::shared_ptr<Window> Application::GetWindow() const noexcept
+{
+	return m_pWindow;
+}
+
 bool Application::Frame() noexcept
 {
+	float deltaTime = m_pTimer->Mark();
 	if (!m_pWindow->GetGraphics()->ClearBackBuffer(0.4f, 0.4f, 0.4f))
 	{
 		return false;
 	}
 	
-	if (!m_pWindow->GetGraphics()->DrawTestCube(0.0f, 0.0f, 0.0f))
-	{
-		return false;
-	}
+	//m_pWindow->GetGraphics()->DrawTestTriangle(0.0f, 0.0f, 0.0f);
 
-	float xPos = 2.0f * m_pWindow->GetMouse()->GetXPosition() / m_pWindow->GetWidth() - 1.0f;
-	float yPos = -2.0f * m_pWindow->GetMouse()->GetYPosition() / m_pWindow->GetHeight() + 1.0f;
-	
-	if (!m_pWindow->GetGraphics()->DrawTestCube(m_pTimer->Peek(), xPos, yPos))
+	for (auto& pBox : m_boxes)
 	{
-		return false;
+		pBox->Update(deltaTime);
+		pBox->Draw(m_pWindow->GetGraphics().get());
 	}
 
 	if (!m_pWindow->GetGraphics()->SwapFrames())
@@ -75,4 +88,9 @@ bool Application::Frame() noexcept
 	}
 
 	return true;
+}
+
+void Application::AddBox(std::unique_ptr<Cube> pNewBox) noexcept
+{
+	m_boxes.push_back(std::move(pNewBox));
 }

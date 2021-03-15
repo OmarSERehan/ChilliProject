@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "Timer.h"
 #include <iomanip>
+#include "Cube.h"
 
 class Application
 {
@@ -19,6 +20,12 @@ private:
 
 	std::shared_ptr<Window> m_pWindow;
 	std::shared_ptr<Timer> m_pTimer;
+
+	std::vector<std::unique_ptr<Cube>> m_boxes;
+
+	void AddBox(std::unique_ptr<Cube> pNewBox) noexcept;
+
+	std::shared_ptr<Window> GetWindow() const noexcept;
 
 public:
 	Application() = default;

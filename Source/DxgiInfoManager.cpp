@@ -44,7 +44,7 @@ std::vector<std::string> DxgiInfoManager::GetMessages() const
 	for (auto i = next; i < end; i++)
 	{
 		// get the size of message i in bytes
-		SIZE_T messageLength;
+		SIZE_T messageLength = 0;
 		HRESULT result = m_pDxgiInfoQueue->GetMessage(DXGI_DEBUG_ALL, i, nullptr, &messageLength);
 		if (FAILED(result) == TRUE)
 		{

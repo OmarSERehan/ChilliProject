@@ -164,16 +164,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Application.cpp" />
+    <ClCompile Include="Source\ConstantBuffer.cpp" />
+    <ClCompile Include="Source\Cube.cpp" />
     <ClCompile Include="Source\DxgiInfoManager.cpp" />
+    <ClCompile Include="Source\TransformMatrixCBuffer.cpp" />
     <ClCompile Include="Source\Graphics.cpp" />
+    <ClCompile Include="Source\IDrawable.cpp" />
     <ClCompile Include="Source\IndexBuffer.cpp" />
     <ClCompile Include="Source\InputLayout.cpp" />
     <ClCompile Include="Source\Keyboard.cpp" />
     <ClCompile Include="Source\Mouse.cpp" />
     <ClCompile Include="Source\ErrorHandler.cpp" />
+    <ClCompile Include="Source\PixelShader.cpp" />
     <ClCompile Include="Source\Timer.cpp" />
     <ClCompile Include="Source\Topology.cpp" />
     <ClCompile Include="Source\VertexBuffer.cpp" />
+    <ClCompile Include="Source\VertexShader.cpp" />
+    <ClCompile Include="Source\Viewport.cpp" />
     <ClCompile Include="Source\Window.cpp" />
     <ClCompile Include="Source\WindowAPIClass.cpp" />
     <ClCompile Include="Source\WinMain.cpp" />
@@ -182,17 +189,23 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Source\Application.h" />
     <ClInclude Include="Source\ConstantBuffer.h" />
+    <ClInclude Include="Source\Cube.h" />
+    <ClInclude Include="Source\TransformMatrixCBuffer.h" />
     <ClInclude Include="Source\IBindable.h" />
     <ClInclude Include="Source\DxgiInfoManager.h" />
     <ClInclude Include="Source\Graphics.h" />
+    <ClInclude Include="Source\IDrawable.h" />
     <ClInclude Include="Source\IndexBuffer.h" />
     <ClInclude Include="Source\InputLayout.h" />
     <ClInclude Include="Source\Keyboard.h" />
     <ClInclude Include="Source\Mouse.h" />
     <ClInclude Include="Source\ErrorHandler.h" />
+    <ClInclude Include="Source\PixelShader.h" />
     <ClInclude Include="Source\Timer.h" />
     <ClInclude Include="Source\Topology.h" />
     <ClInclude Include="Source\VertexBuffer.h" />
+    <ClInclude Include="Source\VertexShader.h" />
+    <ClInclude Include="Source\Viewport.h" />
     <ClInclude Include="Source\Window.h" />
     <ClInclude Include="Source\WindowAPIClass.h" />
     <ClInclude Include="Source\WinHeader.h" />

@@ -1,12 +1,12 @@
 #include "Topology.h"
 #include "Graphics.h"
 
-std::shared_ptr<Topology> Topology::CreateObject(D3D11_PRIMITIVE_TOPOLOGY type) noexcept
+std::unique_ptr<Topology> Topology::CreateObject(D3D11_PRIMITIVE_TOPOLOGY type) noexcept
 {
-	std::shared_ptr<Topology> pTopology = std::make_shared<Topology>();
+	std::unique_ptr<Topology> pTopology = std::make_unique<Topology>();
 	pTopology->SetType(type);
 
-	return pTopology;
+	return std::move(pTopology);
 }
 bool Topology::DestroyObject() noexcept
 {

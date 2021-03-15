@@ -16,6 +16,11 @@ public:
 	bool DestroyObject() noexcept;
 
 	bool SwapFrames() noexcept;
+
+	DirectX::XMMATRIX GetProjection() noexcept;
+	void SetProjection(DirectX::XMMATRIX projMatrix) noexcept;
+
+	bool DrawIndexed(uint32_t count) noexcept;
 	
 	bool ClearBackBuffer(float r, float g, float b) noexcept;
 	bool DrawTestTriangle(float angle, float x, float y) noexcept;
@@ -29,6 +34,7 @@ public:
 
 private:
 	const float m_inverseAspectRatio = 0.75f;
+	DirectX::XMMATRIX m_projMatrix;
 
 	void SetDevice(Microsoft::WRL::ComPtr<ID3D11Device> pDevice) noexcept;
 	void SetSwapChain(Microsoft::WRL::ComPtr<IDXGISwapChain> pSwapChain) noexcept;

@@ -5,7 +5,7 @@
 class IndexBuffer : public IBindable
 {
 public:
-	static std::shared_ptr<IndexBuffer> CreateObject(Graphics* gfx, const std::vector<uint16_t>& indices) noexcept;
+	static std::unique_ptr<IndexBuffer> CreateObject(Graphics* gfx, const std::vector<uint16_t>& indices) noexcept;
 	bool DestroyObject() noexcept;
 
 	virtual void Bind(Graphics* gfx) noexcept override;

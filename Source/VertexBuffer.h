@@ -5,14 +5,14 @@ class VertexBuffer : public IBindable
 {
 public:
 	template<class Vertex>
-	static std::shared_ptr<VertexBuffer> CreateObject(Graphics* gfx, const std::vector<Vertex>& vertices) noexcept
+	static std::unique_ptr<VertexBuffer> CreateObject(Graphics* gfx, const std::vector<Vertex>& vertices) noexcept
 	{
-		std::shared_ptr<VertexBuffer> pVertexBuffer = std::make_shared<VertexBuffer>();
+		std::unique_ptr<VertexBuffer> pVertexBuffer = std::make_unique<VertexBuffer>();
 		pVertexBuffer->SetStride(sizeof(Vertex));
 
 		D3D11_SUBRESOURCE_DATA bufferInitialData;
 		{
-			bufferInitialData.pSysMem = vertices;
+			bufferInitialData.pSysMem = vertices.data();
 		}
 
 		/// Data about the buffer (as a whole) we want to create
@@ -35,13 +35,13 @@ public:
 			if (FAILED(result) == TRUE)
 			{
 				ErrorHandler::ErrorBox(L"Error Creating Vertex Buffer", result, __FILE__, __LINE__);
-				return false;
+				return nullptr;
 			}
 			pVertexBuffer->SetBuffer(pBuffer);
 		}
 
 		
-		return pVertexBuffer;
+		return std::move(pVertexBuffer);
 	}
 	bool DestroyObject() noexcept;
 

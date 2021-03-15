@@ -6,7 +6,7 @@ class Graphics;
 class InputLayout : public IBindable
 {
 public:
-	static std::shared_ptr<InputLayout> CreateObject(Graphics* gfx, Microsoft::WRL::ComPtr<ID3DBlob> pVSBlob) noexcept;
+	static std::unique_ptr<InputLayout> CreateObject(Graphics* gfx, std::vector<D3D11_INPUT_ELEMENT_DESC> description, Microsoft::WRL::ComPtr<ID3DBlob> pVSBlob) noexcept;
 	bool DestroyObject() noexcept;
 
 	virtual void Bind(Graphics* gfx) noexcept override;

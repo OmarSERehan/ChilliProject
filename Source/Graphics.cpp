@@ -209,6 +209,31 @@ bool Graphics::SwapFrames() noexcept
 	return true;
 }
 
+DirectX::XMMATRIX Graphics::GetProjection() noexcept
+{
+	return m_projMatrix;
+}
+void Graphics::SetProjection(DirectX::XMMATRIX projMatrix) noexcept
+{
+	m_projMatrix = projMatrix;
+}
+
+bool Graphics::DrawIndexed(uint32_t count) noexcept
+{
+	dxgiInfoManager.Mark();
+	{
+		m_pContext->DrawIndexed(count, 0u, 0u);
+	}
+	std::vector<std::string> errorMessages = dxgiInfoManager.GetMessages();
+	if (!errorMessages.empty())
+	{
+		ErrorHandler::ErrorBox(L"Error Issuing Indexed Draw Command", errorMessages, __FILE__, __LINE__);
+		return false;
+	}
+
+	return true;
+}
+
 bool Graphics::ClearBackBuffer(float r, float g, float b) noexcept
 {
 	const float color[] = { r, g, b, 1.0f };
@@ -486,152 +511,6 @@ bool Graphics::DrawTestTriangle(float angle, float x, float y) noexcept
 }
 bool Graphics::DrawTestCube(float angle, float x, float y) noexcept
 {
-	/// Actual vertices data
-	struct Vertex
-	{
-		struct { float x, y, z; } Position;
-		struct { unsigned char r, g, b, a; } Color;
-	};
-	
-	const Vertex vertices[]
-	{
-		{ -1.0f, -1.0f, -1.0f},
-		{ +1.0f, -1.0f, -1.0f},
-		{ -1.0f, +1.0f, -1.0f},
-		{ +1.0f, +1.0f, -1.0f},
-		{ -1.0f, -1.0f, +1.0f},
-		{ +1.0f, -1.0f, +1.0f},
-		{ -1.0f, +1.0f, +1.0f},
-		{ +1.0f, +1.0f, +1.0f}
-	};
-	const uint16_t indices[]
-	{ // must be CW not CCW
-		// Front Face
-		0, 2, 1,
-		2, 3, 1,
-		// Back Face
-		1, 3, 4,
-		3, 7, 5,
-		// Right Face
-		2, 6, 3,
-		3, 6, 7,
-		// Left Face
-		4, 5, 7,
-		4, 7, 6,
-		// Top Face
-		0, 4, 2,
-		2, 4, 6,
-		// Bottom Face
-		0, 1, 4,
-		1, 5, 4
-	};
-
-
-	/// Load & bind Pixel Shader to pipeline
-	{
-		Microsoft::WRL::ComPtr<ID3DBlob> pPSBlob = nullptr;
-		HRESULT result = D3DReadFileToBlob(L"Source/SimpleCubePS.cso", &pPSBlob);
-		if (FAILED(result) == TRUE)
-		{
-			ErrorHandler::ErrorBox(L"Error Reading Pixel Shader File", result, __FILE__, __LINE__);
-			return false;
-		}
-
-		Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader = nullptr;
-		result = m_pDevice->CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), nullptr, &pPixelShader);
-		if (FAILED(result) == TRUE)
-		{
-			ErrorHandler::ErrorBox(L"Error Creating Pixel Shader Object", result, __FILE__, __LINE__);
-			return false;
-		}
-
-		m_pContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
-	}
-
-
-	/// Load & bind Vertex Shader to pipeline
-	Microsoft::WRL::ComPtr<ID3DBlob> pVSBlob = nullptr;
-	{
-		HRESULT result = D3DReadFileToBlob(L"Source/SimpleCubeVS.cso", &pVSBlob);
-		if (FAILED(result) == TRUE)
-		{
-			ErrorHandler::ErrorBox(L"Error Reading Vertex Shader File", result, __FILE__, __LINE__);
-			return false;
-		}
-
-		Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader = nullptr;
-		result = m_pDevice->CreateVertexShader(pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), nullptr, &pVertexShader);
-		if (FAILED(result) == TRUE)
-		{
-			ErrorHandler::ErrorBox(L"Error Creating Vertex Shader Object", result, __FILE__, __LINE__);
-			return false;
-		}
-
-		m_pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-	}
-
-
-	struct TransformationMatrix {
-		DirectX::XMMATRIX transform;
-	};
-	const TransformationMatrix vConstBuffer
-	{
-		DirectX::XMMatrixTranspose(
-			DirectX::XMMatrixRotationZ(angle) *
-			DirectX::XMMatrixRotationX(angle) *
-			DirectX::XMMatrixTranslation(x, 0.0f, y + 4.0f) *
-			DirectX::XMMatrixPerspectiveLH(1.0f, m_inverseAspectRatio, 0.5f, 10.0f)
-		)
-	};
-
-
-	struct ColorArray {
-		struct { float r, g, b, a; } faceColors[6];
-	};
-	const ColorArray pConstBuffer
-	{
-		{
-			{ 1.0f, 0.0f, 0.0f },
-			{ 0.0f, 1.0f, 0.0f },
-			{ 0.0f, 0.0f, 1.0f },
-			{ 1.0f, 1.0f, 0.0f },
-			{ 1.0f, 0.0f, 1.0f },
-			{ 0.0f, 1.0f, 1.0f }
-		}
-	};
-
-
-	/// Configure Viewport
-	{
-		D3D11_VIEWPORT viewport;
-		{ /// properties relative to render target view
-			viewport.TopLeftX = 0.0f;
-			viewport.TopLeftY = 0.0f;
-
-			viewport.Width = 800.0f;
-			viewport.Height = 600.0f;
-
-			viewport.MinDepth = 0.0f;
-			viewport.MaxDepth = 1.0f;
-		}
-
-		m_pContext->RSSetViewports(1u, &viewport);
-	}
-
-
-	/// Issue draw command
-	{
-		dxgiInfoManager.Mark();
-		m_pContext->DrawIndexed((UINT)std::size(indices), 0u, 0u);
-		std::vector<std::string> errorMessages = dxgiInfoManager.GetMessages();
-		if (!errorMessages.empty())
-		{
-			ErrorHandler::ErrorBox(L"Error Issuing Draw Command", errorMessages, __FILE__, __LINE__);
-			return false;
-		}
-	}
-
-
 	return true;
 }
 
