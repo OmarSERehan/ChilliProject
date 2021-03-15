@@ -5,13 +5,9 @@
 class Topology : public IBindable
 {
 public:
-	static std::unique_ptr<Topology> CreateObject(D3D11_PRIMITIVE_TOPOLOGY type) noexcept;
-	bool DestroyObject() noexcept;
+	Topology(D3D11_PRIMITIVE_TOPOLOGY type);
 
 	void Bind(Graphics* gfx) noexcept;
-
-	void SetType(D3D11_PRIMITIVE_TOPOLOGY type) noexcept;
-
 
 private:
 	D3D11_PRIMITIVE_TOPOLOGY m_type;

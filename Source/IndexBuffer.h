@@ -5,18 +5,16 @@
 class IndexBuffer : public IBindable
 {
 public:
-	static std::unique_ptr<IndexBuffer> CreateObject(Graphics* gfx, const std::vector<uint16_t>& indices) noexcept;
-	bool DestroyObject() noexcept;
+	IndexBuffer(Graphics* gfx, const std::vector<uint16_t>& indices);
 
 	virtual void Bind(Graphics* gfx) noexcept override;
 
-	uint32_t GetCount() const noexcept;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> GetBuffer() const noexcept;
-
+	uint32_t GetCount() const noexcept
+	{
+		return m_count;
+	}
+	
 private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pBuffer = nullptr;
 	uint32_t m_count = 0u;
-
-	void SetBuffer(Microsoft::WRL::ComPtr<ID3D11Buffer> pBuffer) noexcept;
-	void SetCount(uint32_t count) noexcept;
 };

@@ -30,7 +30,7 @@ public:
 
 
 private:
-	float m_radius;
+	float m_radius = 0.0f;
 	void SetRadius(float radius) noexcept;
 	
 	/// Rotation around local origin

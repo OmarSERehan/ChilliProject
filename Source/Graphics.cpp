@@ -173,6 +173,18 @@ std::shared_ptr<Graphics> Graphics::CreateObject(HWND windowHandle) noexcept
 	pGraphics->GetContext()->OMSetRenderTargets(1u, pRTV.GetAddressOf(), pDSV.Get());
 
 
+	D3D11_VIEWPORT viewport;
+	{
+		viewport.Width = 800.0f;
+		viewport.Height = 600.0f;
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+		viewport.TopLeftX = 0.0f;
+		viewport.TopLeftY = 0.0f;
+	}
+	pGraphics->GetContext()->RSSetViewports(1u, &viewport);
+
+
 	return pGraphics;
 }
 bool Graphics::DestroyObject() noexcept 

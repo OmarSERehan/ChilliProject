@@ -35,13 +35,13 @@ std::unique_ptr<Cube> Cube::CreateObject(
 		{ -1.0f, +1.0f, +1.0f},
 		{ +1.0f, +1.0f, +1.0f}
 	};
-	pCube->AddBind(VertexBuffer::CreateObject<Vertex>(gfx, vertices));
+	pCube->AddBind(std::make_unique<VertexBuffer>(gfx, vertices));
 
 
 	/// Vertex Shader
 	Microsoft::WRL::ComPtr<ID3DBlob> pVsBlob = nullptr;
 	{
-		std::unique_ptr<VertexShader> pVs = VertexShader::CreateObject(gfx, L"Source/SimpleCubeVS.cso");
+		std::unique_ptr<VertexShader> pVs = std::make_unique<VertexShader>(gfx, L"Source/SimpleCubeVS.cso");
 		pVsBlob = pVs->GetBlob();
 		
 		pCube->AddBind(std::move(pVs));
@@ -49,7 +49,7 @@ std::unique_ptr<Cube> Cube::CreateObject(
 
 
 	/// Pixel Shader
-	pCube->AddBind(PixelShader::CreateObject(gfx, L"Source/SimpleCubePS.cso"));
+	pCube->AddBind(std::make_unique<PixelShader>(gfx, L"Source/SimpleCubePS.cso"));
 
 
 	/// Index Buffer (CW)
@@ -74,7 +74,7 @@ std::unique_ptr<Cube> Cube::CreateObject(
 		0, 1, 4,
 		1, 5, 4
 	};
-	pCube->AddBind(IndexBuffer::CreateObject(gfx, indices));
+	pCube->AddBind(std::make_unique<IndexBuffer>(gfx, indices));
 
 
 	/// Color Array
@@ -92,7 +92,7 @@ std::unique_ptr<Cube> Cube::CreateObject(
 			{ 0.0f, 1.0f, 1.0f }
 		}
 	};
-	pCube->AddBind(PixelConstantBuffer<ColorArray>::CreateObject(gfx, pConstBuffer));
+	pCube->AddBind(std::make_unique<PixelConstantBuffer<ColorArray>>(gfx, pConstBuffer));
 
 
 	/// Input Layout
@@ -110,19 +110,15 @@ std::unique_ptr<Cube> Cube::CreateObject(
 			NULL							// InstanceDataStepRate
 		}
 	};
-	pCube->AddBind(InputLayout::CreateObject(gfx, inputLayoutDescription, pVsBlob));
+	pCube->AddBind(std::make_unique<InputLayout>(gfx, inputLayoutDescription, pVsBlob));
 
 
 	/// Topology
-	pCube->AddBind(Topology::CreateObject(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+	pCube->AddBind(std::make_unique<Topology>(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 
 	/// Transformation Matrix
-	pCube->AddBind(TransformMatrixCBuffer::CreateObject(gfx, pCube.get()));
-
-
-	/// Viewport
-	pCube->AddBind(Viewport::CreateObject(800.0f, 600.0f));
+	pCube->AddBind(std::make_unique<TransformMatrixCBuffer>(gfx, pCube.get()));
 
 
 	return pCube;

@@ -1,14 +1,10 @@
 #include "IndexBuffer.h"
 #include "Graphics.h"
 
-std::unique_ptr<IndexBuffer> IndexBuffer::CreateObject(Graphics* gfx, const std::vector<uint16_t>& indices) noexcept
+IndexBuffer::IndexBuffer(Graphics* gfx, const std::vector<uint16_t>& indices)
+	:
+	m_count(indices.size())
 {
-	std::unique_ptr<IndexBuffer> pIndexBuffer = std::make_unique<IndexBuffer>();
-	{
-		pIndexBuffer->SetCount(indices.size());
-	}
-
-	
 	D3D11_SUBRESOURCE_DATA bufferInitialData;
 	{
 		bufferInitialData.pSysMem = indices.data();
@@ -25,50 +21,20 @@ std::unique_ptr<IndexBuffer> IndexBuffer::CreateObject(Graphics* gfx, const std:
 		bufferDescription.MiscFlags = NULL;
 
 		bufferDescription.StructureByteStride = sizeof(uint16_t);
-		bufferDescription.ByteWidth = sizeof(uint16_t) * pIndexBuffer->GetCount();
+		bufferDescription.ByteWidth = sizeof(uint16_t) * m_count;
 	}
 
 
 	/// Create index buffer
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pBuffer = nullptr;
-	HRESULT result = gfx->GetDevice()->CreateBuffer(&bufferDescription, &bufferInitialData, &pBuffer);
+	HRESULT result = gfx->GetDevice()->CreateBuffer(&bufferDescription, &bufferInitialData, &m_pBuffer);
 	if (FAILED(result) == TRUE)
 	{
 		ErrorHandler::ErrorBox(L"Error Creating Index Buffer", result, __FILE__, __LINE__);
-		return nullptr;
+		throw - 1;
 	}
-	pIndexBuffer->SetBuffer(pBuffer);
-
-
-	return std::move(pIndexBuffer);
 }
-bool IndexBuffer::DestroyObject() noexcept
-{
-	return true;
-}
-
 
 void IndexBuffer::Bind(Graphics* gfx) noexcept
 {
 	gfx->GetContext()->IASetIndexBuffer(m_pBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
-}
-
-
-void IndexBuffer::SetCount(uint32_t count) noexcept
-{
-	m_count = count;
-}
-void IndexBuffer::SetBuffer(Microsoft::WRL::ComPtr<ID3D11Buffer> pBuffer) noexcept
-{
-	m_pBuffer = pBuffer;
-}
-
-
-uint32_t IndexBuffer::GetCount() const noexcept
-{
-	return m_count;
-}
-Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer::GetBuffer() const noexcept
-{
-	return m_pBuffer;
 }

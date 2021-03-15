@@ -5,7 +5,7 @@ template <class T>
 class ConstantBuffer : public IBindable
 {
 public:
-	static Microsoft::WRL::ComPtr<ID3D11Buffer> CreateBuffer(Graphics* gfx) noexcept
+	ConstantBuffer(Graphics* gfx)
 	{
 		D3D11_BUFFER_DESC bufferDescription = {};
 		{
@@ -19,17 +19,14 @@ public:
 			bufferDescription.ByteWidth = sizeof(T);
 		}
 
-		Microsoft::WRL::ComPtr<ID3D11Buffer> pBuffer = nullptr;
-		HRESULT result = gfx->GetDevice()->CreateBuffer(&bufferDescription, nullptr, &pBuffer);
+		HRESULT result = gfx->GetDevice()->CreateBuffer(&bufferDescription, nullptr, &m_pBuffer);
 		if (FAILED(result) == TRUE)
 		{
 			ErrorHandler::ErrorBox(L"Error Creating Constant Buffer Object", result, __FILE__, __LINE__);
-			return nullptr;
+			throw - 1;
 		}
-
-		return pBuffer;
 	}
-	static Microsoft::WRL::ComPtr<ID3D11Buffer> CreateBuffer(Graphics* gfx, const T& buffer) noexcept
+	ConstantBuffer(Graphics* gfx, const T& buffer)
 	{
 		D3D11_BUFFER_DESC bufferDescription = {};
 		{
@@ -48,15 +45,12 @@ public:
 			bufferInitialData.pSysMem = &buffer;
 		}
 
-		Microsoft::WRL::ComPtr<ID3D11Buffer> pBuffer = nullptr;
-		HRESULT result = gfx->GetDevice()->CreateBuffer(&bufferDescription, &bufferInitialData, &pBuffer);
+		HRESULT result = gfx->GetDevice()->CreateBuffer(&bufferDescription, &bufferInitialData, &m_pBuffer);
 		if (FAILED(result) == TRUE)
 		{
 			ErrorHandler::ErrorBox(L"Error Creating Constant Buffer Object", result, __FILE__, __LINE__);
-			return nullptr;
+			throw - 1;
 		}
-		
-		return pBuffer;
 	}
 
 	// update constant buffer data in VRAM
@@ -68,14 +62,8 @@ public:
 		gfx->GetContext()->Unmap(m_pBuffer.Get(), 0u);
 	}
 
-
 protected:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pBuffer;
-
-	void SetBuffer(Microsoft::WRL::ComPtr<ID3D11Buffer> pBuffer) noexcept
-	{
-		m_pBuffer = pBuffer;
-	}
 };
 
 
@@ -83,24 +71,7 @@ template<typename T>
 class VertexConstantBuffer : public ConstantBuffer<T>
 {
 public:
-	static std::unique_ptr<VertexConstantBuffer> CreateObject(Graphics* gfx) noexcept
-	{
-		std::unique_ptr<VertexConstantBuffer> pVCB = std::make_unique<VertexConstantBuffer>();
-		pVCB->SetBuffer(ConstantBuffer<T>::CreateBuffer(gfx));
-
-		return std::move(pVCB);
-	}
-	static std::unique_ptr<VertexConstantBuffer> CreateObject(Graphics* gfx, const T& buffer) noexcept
-	{
-		std::unique_ptr<VertexConstantBuffer> pVCB = std::make_unique<VertexConstantBuffer>();
-		pVCB->SetBuffer(ConstantBuffer<T>::CreateBuffer(gfx, buffer));
-
-		return std::move(pVCB);
-	}
-	bool DestroyObject() noexcept
-	{
-		if (this->m_pBuffer.Release());
-	}
+	using ConstantBuffer<T>::ConstantBuffer;
 
 	virtual void Bind(Graphics* gfx) noexcept override
 	{
@@ -113,24 +84,7 @@ template<typename T>
 class PixelConstantBuffer : public ConstantBuffer<T>
 {
 public:
-	static std::unique_ptr<PixelConstantBuffer> CreateObject(Graphics* gfx) noexcept
-	{
-		std::unique_ptr<PixelConstantBuffer> pPCB = std::make_unique<PixelConstantBuffer>();
-		pPCB->SetBuffer(ConstantBuffer<T>::CreateBuffer(gfx));
-
-		return std::move(pPCB);
-	}
-	static std::unique_ptr<PixelConstantBuffer> CreateObject(Graphics* gfx, const T& buffer) noexcept
-	{
-		std::unique_ptr<PixelConstantBuffer> pPCB = std::make_unique<PixelConstantBuffer>();
-		pPCB->SetBuffer(ConstantBuffer<T>::CreateBuffer(gfx, buffer));
-
-		return std::move(pPCB);
-	}
-	bool DestroyObject() noexcept
-	{
-		if (this->m_pBuffer.Release());
-	}
+	using ConstantBuffer<T>::ConstantBuffer;
 
 	virtual void Bind(Graphics* gfx) noexcept override
 	{
