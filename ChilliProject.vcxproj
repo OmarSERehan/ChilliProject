@@ -178,6 +178,7 @@
     <ClCompile Include="Source\PixelShader.cpp" />
     <ClCompile Include="Source\Timer.cpp" />
     <ClCompile Include="Source\Topology.cpp" />
+    <ClCompile Include="Source\Triangle.cpp" />
     <ClCompile Include="Source\VertexBuffer.cpp" />
     <ClCompile Include="Source\VertexShader.cpp" />
     <ClCompile Include="Source\Viewport.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="Source\PixelShader.h" />
     <ClInclude Include="Source\Timer.h" />
     <ClInclude Include="Source\Topology.h" />
+    <ClInclude Include="Source\Triangle.h" />
     <ClInclude Include="Source\VertexBuffer.h" />
     <ClInclude Include="Source\VertexShader.h" />
     <ClInclude Include="Source\Viewport.h" />

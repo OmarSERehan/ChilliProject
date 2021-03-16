@@ -1,24 +1,29 @@
 #include "Cube.h"
 
 
-std::unique_ptr<Cube> Cube::CreateObject(
+Cube::Cube(
 	Graphics* gfx,
 	std::mt19937& rng,
 	std::uniform_real_distribution<float>& rDistribution,
 	std::uniform_real_distribution<float>& grDistribution,
 	std::uniform_real_distribution<float>& laDistribution,
 	std::uniform_real_distribution<float>& gaDistribution
-) noexcept
-{
-	std::unique_ptr<Cube> pCube = std::make_unique<Cube>();
-	{
-		pCube->SetRadius(rDistribution(rng));
-		pCube->SetGlobalRotation(grDistribution(rng), grDistribution(rng), grDistribution(rng));
-		pCube->SetLocalAngularSpeed(laDistribution(rng), laDistribution(rng), laDistribution(rng));
-		pCube->SetGlobalAngularSpeed(gaDistribution(rng), gaDistribution(rng), gaDistribution(rng));
-	}
-	
+)
+	:
+	m_radius(rDistribution(rng)),
 
+	m_theta(grDistribution(rng)),
+	m_phi(grDistribution(rng)),
+	m_chi(grDistribution(rng)),
+
+	m_deltaPitch(laDistribution(rng)),
+	m_deltaYaw(laDistribution(rng)),
+	m_deltaRoll(laDistribution(rng)),
+
+	m_deltaTheta(gaDistribution(rng)),
+	m_deltaPhi(gaDistribution(rng)),
+	m_deltaChi(gaDistribution(rng))
+{
 	/// Vertex Buffer
 	struct Vertex
 	{
@@ -26,16 +31,16 @@ std::unique_ptr<Cube> Cube::CreateObject(
 	};
 	const std::vector<Vertex> vertices =
 	{
-		{ -1.0f, -1.0f, -1.0f},
-		{ +1.0f, -1.0f, -1.0f},
-		{ -1.0f, +1.0f, -1.0f},
-		{ +1.0f, +1.0f, -1.0f},
-		{ -1.0f, -1.0f, +1.0f},
-		{ +1.0f, -1.0f, +1.0f},
-		{ -1.0f, +1.0f, +1.0f},
-		{ +1.0f, +1.0f, +1.0f}
+		{ -1.0f,-1.0f,-1.0f },
+		{ 1.0f,-1.0f,-1.0f },
+		{ -1.0f,1.0f,-1.0f },
+		{ 1.0f,1.0f,-1.0f },
+		{ -1.0f,-1.0f,1.0f },
+		{ 1.0f,-1.0f,1.0f },
+		{ -1.0f,1.0f,1.0f },
+		{ 1.0f,1.0f,1.0f },
 	};
-	pCube->AddBind(std::make_unique<VertexBuffer>(gfx, vertices));
+	AddBind(std::make_unique<VertexBuffer>(gfx, vertices));
 
 
 	/// Vertex Shader
@@ -44,37 +49,25 @@ std::unique_ptr<Cube> Cube::CreateObject(
 		std::unique_ptr<VertexShader> pVs = std::make_unique<VertexShader>(gfx, L"Source/SimpleCubeVS.cso");
 		pVsBlob = pVs->GetBlob();
 		
-		pCube->AddBind(std::move(pVs));
+		AddBind(std::move(pVs));
 	}
 
 
 	/// Pixel Shader
-	pCube->AddBind(std::make_unique<PixelShader>(gfx, L"Source/SimpleCubePS.cso"));
+	AddBind(std::make_unique<PixelShader>(gfx, L"Source/SimpleCubePS.cso"));
 
 
 	/// Index Buffer (CW)
 	const std::vector<uint16_t> indices =
 	{
-		// Front Face
-		0, 2, 1,
-		2, 3, 1,
-		// Back Face
-		1, 3, 4,
-		3, 7, 5,
-		// Right Face
-		2, 6, 3,
-		3, 6, 7,
-		// Left Face
-		4, 5, 7,
-		4, 7, 6,
-		// Top Face
-		0, 4, 2,
-		2, 4, 6,
-		// Bottom Face
-		0, 1, 4,
-		1, 5, 4
+		0,2,1, 2,3,1,
+		1,3,5, 3,7,5,
+		2,6,3, 3,6,7,
+		4,5,7, 4,7,6,
+		0,4,2, 2,4,6,
+		0,1,4, 1,5,4
 	};
-	pCube->AddBind(std::make_unique<IndexBuffer>(gfx, indices));
+	AddBind(std::make_unique<IndexBuffer>(gfx, indices));
 
 
 	/// Color Array
@@ -92,7 +85,7 @@ std::unique_ptr<Cube> Cube::CreateObject(
 			{ 0.0f, 1.0f, 1.0f }
 		}
 	};
-	pCube->AddBind(std::make_unique<PixelConstantBuffer<ColorArray>>(gfx, pConstBuffer));
+	AddBind(std::make_unique<PixelConstantBuffer<ColorArray>>(gfx, pConstBuffer));
 
 
 	/// Input Layout
@@ -110,22 +103,15 @@ std::unique_ptr<Cube> Cube::CreateObject(
 			NULL							// InstanceDataStepRate
 		}
 	};
-	pCube->AddBind(std::make_unique<InputLayout>(gfx, inputLayoutDescription, pVsBlob));
+	AddBind(std::make_unique<InputLayout>(gfx, inputLayoutDescription, pVsBlob));
 
 
 	/// Topology
-	pCube->AddBind(std::make_unique<Topology>(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+	AddBind(std::make_unique<Topology>(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
 
 
 	/// Transformation Matrix
-	pCube->AddBind(std::make_unique<TransformMatrixCBuffer>(gfx, pCube.get()));
-
-
-	return pCube;
-}
-bool Cube::DestroyObject() noexcept
-{
-	return true;
+	AddBind(std::make_unique<TransformMatrixCBuffer>(gfx, this));
 }
 
 void Cube::Update(float deltaTime) noexcept
@@ -141,41 +127,9 @@ void Cube::Update(float deltaTime) noexcept
 
 DirectX::XMMATRIX Cube::GetModelMatrix() const noexcept
 {
-	return
+	return 
 		DirectX::XMMatrixRotationRollPitchYaw(m_pitch, m_yaw, m_roll) *
 		DirectX::XMMatrixTranslation(m_radius, 0.0f, 0.0f) *
 		DirectX::XMMatrixRotationRollPitchYaw(m_theta, m_phi, m_chi) *
-		DirectX::XMMatrixTranslation(0.0f, 0.0f, 20.0f);
-}
-
-
-void Cube::SetRadius(float radius) noexcept
-{
-	m_radius = radius;
-}
-
-void Cube::SetLocalRotation(float pitch, float yaw, float roll) noexcept
-{
-	m_pitch = pitch;
-	m_yaw = yaw;
-	m_roll = roll;
-}
-void Cube::SetGlobalRotation(float theta, float phi, float chi) noexcept
-{
-	m_theta = theta;
-	m_phi = phi;
-	m_chi = chi;
-}
-
-void Cube::SetLocalAngularSpeed(float deltaPitch, float deltaYaw, float deltaRoll) noexcept
-{
-	m_deltaPitch = deltaPitch;
-	m_deltaYaw = deltaYaw;
-	m_deltaRoll = deltaRoll;
-}
-void Cube::SetGlobalAngularSpeed(float deltaTheta, float deltaPhi, float deltaChi) noexcept
-{
-	m_deltaTheta = deltaTheta;
-	m_deltaPhi = deltaPhi;
-	m_deltaChi = deltaChi;
+		DirectX::XMMatrixTranslation(0.0f, 0.0f, 30.0f);
 }

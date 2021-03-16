@@ -24,12 +24,16 @@ public:
 			bufferDescription.MiscFlags = NULL;
 
 			bufferDescription.StructureByteStride = sizeof(Vertex);
-			bufferDescription.ByteWidth = sizeof(vertices);
+			bufferDescription.ByteWidth = sizeof(Vertex) * vertices.size();
 		}
 
 		/// Create vertex buffer
 		{
 			HRESULT result = gfx->GetDevice()->CreateBuffer(&bufferDescription, &bufferInitialData, &m_pBuffer);
+			/*std::stringstream stringStream;
+			stringStream << std::hex << m_pBuffer.Get();
+			std::string str = stringStream.str();
+			ErrorHandler::Log("Vertex Buffer Address: " + str);*/
 			if (FAILED(result) == TRUE)
 			{
 				ErrorHandler::ErrorBox(L"Error Creating Vertex Buffer", result, __FILE__, __LINE__);
@@ -37,6 +41,7 @@ public:
 			}
 		}
 	}
+	~VertexBuffer();
 
 	virtual void Bind(Graphics* gfx) noexcept override;
 

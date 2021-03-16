@@ -6,10 +6,6 @@
 
 #include "WinHeader.h"
 
-/*
-_RPTFN(_CRT_WARN, "Mouse position: (%d, %d)\n", xPos, yPos);
-*/
-
 
 class ErrorHandler
 {
@@ -22,6 +18,8 @@ public:
 	static void ErrorBox(const wchar_t* title, DWORD errorCode, const char* file, uint32_t line) noexcept;
 	static void ErrorBox(const wchar_t* title, HRESULT result, const char* file, uint32_t line) noexcept;
 	static void ErrorBox(const wchar_t* title, std::vector<std::string> errorMessages, const char* file, uint32_t line) noexcept;
+
+	static void Log(const std::string& message) noexcept;
 
 private:
 	static std::wstring ConvertToWideString(const std::string& str) noexcept;

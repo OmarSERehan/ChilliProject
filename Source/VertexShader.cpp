@@ -26,7 +26,8 @@ VertexShader::VertexShader(Graphics* gfx, std::wstring shaderPath)
 
 void VertexShader::Bind(Graphics* gfx) noexcept
 {
-	gfx->GetContext()->VSSetShader(m_pBuffer.Get(), nullptr, 0u);
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext = gfx->GetContext();
+	pContext->VSSetShader(m_pBuffer.Get(), nullptr, 0u);
 }
 
 Microsoft::WRL::ComPtr<ID3DBlob> VertexShader::GetBlob() const noexcept

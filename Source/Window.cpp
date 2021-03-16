@@ -1,27 +1,21 @@
 #include "Window.h"
 
-std::shared_ptr<Window> Window::CreateObject(
+Window::Window(
 	LPCTSTR windowTitle,
 	int32_t clientWidth,
 	int32_t clientHeight,
 	int32_t positionX,
-	int32_t positionY,
-	std::shared_ptr<WindowAPIClass> pWindowClass,
-	std::shared_ptr<Graphics> pGraphics) noexcept
+	int32_t positionY)
+	:
+	m_width(clientWidth),
+	m_height(clientHeight),
+	m_title(windowTitle),
+	m_pWindowClass(std::make_shared<WindowAPIClass>()),
+	m_pKeyboard(std::make_shared<Keyboard>()),
+	m_pMouse(std::make_shared<Mouse>())
 {
-	/// Create window object
-	std::shared_ptr<Window> pWindow = std::make_shared<Window>();
-
-	/// Pre-Creation initialization
-	if (!pWindowClass)
-	{
-		pWindowClass = WindowAPIClass::CreateObject();
-		if (!pWindow) return nullptr;
-	}
-	pWindow->SetWindowClass(pWindowClass);
-
-	MessageHandler messageHandler = std::bind(&Window::HandleMessage, pWindow.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
-	pWindow->GetWindowClass()->SetMessageHandler(messageHandler);
+	MessageHandler messageHandler = std::bind(&Window::HandleMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
+	m_pWindowClass->SetMessageHandler(messageHandler);
 
 	// Create rectangle struct
 	RECT windowRegion;
@@ -37,12 +31,12 @@ std::shared_ptr<Window> Window::CreateObject(
 	if (!result)
 	{
 		ErrorHandler::ErrorBox(L"Error Adjusting Window Rectangle", GetLastError(), __FILE__, __LINE__);
-		return nullptr;
+		throw -1;
 	}
 
 	/// Create window instance
-	HWND windowHandle = CreateWindow(
-		pWindow->GetWindowClass()->GetName(),
+	m_handle = CreateWindow(
+		m_pWindowClass->GetName(),
 		windowTitle,
 		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
 		CW_USEDEFAULT,
@@ -51,68 +45,38 @@ std::shared_ptr<Window> Window::CreateObject(
 		windowRegion.bottom - windowRegion.top,
 		nullptr,
 		nullptr,
-		pWindow->GetWindowClass()->GetApplicationHandle(),
-		pWindow->GetWindowClass().get()
+		m_pWindowClass->GetApplicationHandle(),
+		m_pWindowClass.get()
 	);
-	if (!windowHandle)
+	if (!m_handle)
 	{
 		ErrorHandler::ErrorBox(L"Error creating window", GetLastError(), __FILE__, __LINE__);
-		return nullptr;
+		throw -1;
 	}
-	
-
-	/// Post-Create window initialization
-	pWindow->SetHandle(windowHandle);
-	pWindow->SetWidth(clientWidth);
-	pWindow->SetHeight(clientHeight);
-	pWindow->SetTitle(windowTitle);
-	
-	pWindow->SetKeyboard(std::make_shared<Keyboard>());
-	pWindow->SetMouse(std::make_shared<Mouse>());
-	
-	if (!pGraphics)
-	{
-		pGraphics = Graphics::CreateObject(windowHandle);
-		if (!pGraphics) return nullptr;
-	}
-	pWindow->SetGraphics(pGraphics);
-
-
-	return pWindow;
+	m_pGraphics = std::make_shared<Graphics>(m_handle);
 }
 
-bool Window::DestroyObject() noexcept
+Window::~Window()
 {
 	if (IsWindow(m_handle))
 	{
 		DestroyWindow(m_handle);
 	}
-
-	return m_pWindowClass->DestroyObject();
 }
 
-bool Window::Show() const noexcept
+void Window::Show() const noexcept
 {
-	BOOL result = ShowWindow(m_handle, SW_SHOW);
-	if (result)
+	if (ShowWindow(m_handle, SW_SHOW))
 	{
-		std::wstring errorString = std::to_wstring(GetLastError());
-		MessageBox(nullptr, errorString.c_str(), L"Warning window was already visible", MB_OK | MB_ICONWARNING);
+		ErrorHandler::ErrorBox(L"Warning window was already visible", GetLastError(), __FILE__, __LINE__);
 	}
-
-	return true;
 }
-bool Window::Hide() const noexcept
+void Window::Hide() const noexcept
 {
-	BOOL result = ShowWindow(m_handle, SW_HIDE);
-	if (!result)
+	if (!ShowWindow(m_handle, SW_HIDE))
 	{
-		std::wstring errorString = std::to_wstring(GetLastError());
-		MessageBox(nullptr, errorString.c_str(), L"Warning window was already hidden", MB_OK | MB_ICONWARNING);
-		return false;
+		ErrorHandler::ErrorBox(L"Warning window was already hidden", GetLastError(), __FILE__, __LINE__);
 	}
-
-	return true;
 }
 
 std::optional<uint64_t> Window::ProcessMessages() noexcept
@@ -278,37 +242,8 @@ bool Window::SetTitle(const std::wstring& title) noexcept
 }
 
 
-/// Private Functions
-void Window::SetWindowClass(std::shared_ptr<WindowAPIClass> pWindowClass) noexcept
-{
-	m_pWindowClass = pWindowClass;
-}
+
 std::shared_ptr<WindowAPIClass> Window::GetWindowClass() const noexcept
 {
 	return m_pWindowClass;
-}
-
-void Window::SetHandle(HWND handle) noexcept
-{
-	m_handle = handle;
-}
-void Window::SetWidth(int32_t width) noexcept
-{
-	m_width = width;
-}
-void Window::SetHeight(int32_t height) noexcept
-{
-	m_height = height;
-}
-void Window::SetKeyboard(std::shared_ptr<Keyboard> pKeyboard) noexcept
-{
-	m_pKeyboard = pKeyboard;
-}
-void Window::SetMouse(std::shared_ptr<Mouse> pMouse) noexcept
-{
-	m_pMouse = pMouse;
-}
-void Window::SetGraphics(std::shared_ptr<Graphics> pGraphics) noexcept
-{
-	m_pGraphics = pGraphics;
 }

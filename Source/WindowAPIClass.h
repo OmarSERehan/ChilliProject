@@ -13,21 +13,16 @@ typedef std::function<LRESULT(HWND windowHandle, UINT message, WPARAM wParam, LP
 class WindowAPIClass
 {
 public:
-	static std::shared_ptr<WindowAPIClass> CreateObject(LPCWSTR className = L"Simple Win32 Window Class", MessageHandler messageHandler = DefWindowProc) noexcept;
-	bool DestroyObject() const noexcept;
-
-	// Getter functions
-	HINSTANCE GetApplicationHandle() const noexcept;
-	LPCWSTR GetName() const noexcept;
-	
-	// Setter functions
-	void SetName(LPCWSTR className) noexcept;
-	void SetApplicationHandle(HINSTANCE applicationHandle) noexcept;
-	void SetMessageHandler(MessageHandler messageHandler) noexcept;
+	WindowAPIClass(LPCWSTR className = L"Simple Win32 Window Class", MessageHandler messageHandler = DefWindowProc);
+	~WindowAPIClass();
 
 	// Message handling function
 	static LRESULT CALLBACK HandleMessageEntryPoint(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam) noexcept;
 
+	void SetMessageHandler(MessageHandler messageHandler) noexcept;
+
+	LPCWSTR GetName() const noexcept;
+	HINSTANCE GetApplicationHandle() const noexcept;
 
 private:
 	HINSTANCE m_applicationHandle = NULL;
@@ -35,12 +30,7 @@ private:
 	MessageHandler m_messageHandler;
 
 
-
 public:
-	// Constructor and destructor
-	WindowAPIClass() = default;
-	~WindowAPIClass() = default;
-
 	// Copy semantics
 	WindowAPIClass(const WindowAPIClass&) = delete;
 	WindowAPIClass& operator = (const WindowAPIClass&) = delete;

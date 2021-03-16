@@ -36,5 +36,6 @@ IndexBuffer::IndexBuffer(Graphics* gfx, const std::vector<uint16_t>& indices)
 
 void IndexBuffer::Bind(Graphics* gfx) noexcept
 {
-	gfx->GetContext()->IASetIndexBuffer(m_pBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext = gfx->GetContext();
+	pContext->IASetIndexBuffer(m_pBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
 }

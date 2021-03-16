@@ -11,10 +11,12 @@ class IBindable;
 class IDrawable
 {
 public:
-	void Draw(Graphics* gfx) const noexcept;
-	virtual void Update(float deltaTime) noexcept = 0;
-
 	void AddBind(std::unique_ptr<IBindable> bindable) noexcept;
+
+	virtual void Update(float deltaTime) noexcept = 0;
+	
+	void BindAll(Graphics* gfx) const noexcept;
+	void Draw(Graphics* gfx) const noexcept;
 
 	virtual DirectX::XMMATRIX GetModelMatrix() const noexcept = 0;
 	

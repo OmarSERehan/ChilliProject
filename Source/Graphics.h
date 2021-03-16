@@ -12,19 +12,18 @@
 class Graphics
 {
 public:
-	static std::shared_ptr<Graphics> CreateObject(HWND windowHandle) noexcept;
-	bool DestroyObject() noexcept;
+	Graphics(HWND windowHandle);
 
-	bool SwapFrames() noexcept;
+	void SwapFrames();
 
 	DirectX::XMMATRIX GetProjection() noexcept;
 	void SetProjection(DirectX::XMMATRIX projMatrix) noexcept;
 
-	bool DrawIndexed(uint32_t count) noexcept;
+	void DrawIndexed(uint32_t count);
 	
-	bool ClearBackBuffer(float r, float g, float b) noexcept;
-	bool DrawTestTriangle(float angle, float x, float y) noexcept;
-	bool DrawTestCube(float angle, float x, float y) noexcept;
+	void ClearBackBuffer(float r, float g, float b) noexcept;
+	void DrawTestTriangle(float angle, float x, float y);
+	void DrawTestCube(float angle, float x, float y) noexcept;
 
 
 	Microsoft::WRL::ComPtr<ID3D11Device> GetDevice() const;
@@ -34,15 +33,7 @@ public:
 
 private:
 	const float m_inverseAspectRatio = 0.75f;
-	DirectX::XMMATRIX m_projMatrix;
-
-	void SetDevice(Microsoft::WRL::ComPtr<ID3D11Device> pDevice) noexcept;
-	void SetSwapChain(Microsoft::WRL::ComPtr<IDXGISwapChain> pSwapChain) noexcept;
-	void SetContext(Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext) noexcept;
-	
-	void SetBackBufferRTV(Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pBackBufferRTV) noexcept;
-	void SetDepthBufferDSV(Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepthBufferDSV) noexcept;
-
+	DirectX::XMMATRIX m_projMatrix = DirectX::XMMATRIX();
 
 	Microsoft::WRL::ComPtr<ID3D11Device> m_pDevice = nullptr;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> m_pSwapChain = nullptr;
@@ -56,10 +47,10 @@ private:
 #endif
 
 
-public:
-	Graphics() = default;
-	~Graphics() = default;
+	bool m_bFirstPass = true;
 
+
+public:
 	Graphics(const Graphics&) = delete;
 	Graphics& operator = (const Graphics&) = delete;
 

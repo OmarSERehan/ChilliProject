@@ -55,6 +55,12 @@ void ErrorHandler::ErrorBox(const wchar_t* title, std::vector<std::string> error
 }
 
 
+void ErrorHandler::Log(const std::string& message) noexcept
+{
+	_RPTFN(_CRT_WARN, "%s\n", message.c_str());
+}
+
+
 std::wstring ErrorHandler::ConvertToWideString(const std::string& str) noexcept
 {
 	int numOfChars = MultiByteToWideChar(CP_ACP, NULL, str.c_str(), -1, NULL, NULL);

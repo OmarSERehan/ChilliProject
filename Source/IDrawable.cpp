@@ -2,11 +2,15 @@
 #include "IBindable.h"
 #include "IndexBuffer.h"
 
-void IDrawable::Draw(Graphics* gfx) const noexcept
+void IDrawable::BindAll(Graphics* gfx) const noexcept
 {
 	for (auto& bindable : m_bindables)
 		bindable->Bind(gfx);
+}
 
+void IDrawable::Draw(Graphics* gfx) const noexcept
+{
+	BindAll(gfx);
 	gfx->DrawIndexed(m_indexBufferCount);
 }
 

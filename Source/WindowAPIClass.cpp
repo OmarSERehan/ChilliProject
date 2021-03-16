@@ -1,25 +1,22 @@
 #include "WindowAPIClass.h"
 
-std::shared_ptr<WindowAPIClass> WindowAPIClass::CreateObject(LPCWSTR className, MessageHandler messageHandler) noexcept
+WindowAPIClass::WindowAPIClass(LPCWSTR className, MessageHandler messageHandler)
+	:
+	m_applicationHandle(GetModuleHandle(nullptr)),
+	m_pName(className),
+	m_messageHandler(messageHandler)
 {
-	std::shared_ptr<WindowAPIClass> pWindowClass = std::make_shared<WindowAPIClass>();
-	
-	pWindowClass->SetApplicationHandle(GetModuleHandle(nullptr));
-	pWindowClass->SetName(className);
-	pWindowClass->SetMessageHandler(messageHandler);
-
-
 	WNDCLASS WindowClassStruct = { NULL };
 
-	WindowClassStruct.hInstance = pWindowClass->GetApplicationHandle();
-	WindowClassStruct.lpszClassName = pWindowClass->GetName();
+	WindowClassStruct.hInstance = m_applicationHandle;
+	WindowClassStruct.lpszClassName = m_pName;
 	WindowClassStruct.lpszMenuName = nullptr;
 	WindowClassStruct.lpfnWndProc = HandleMessageEntryPoint;
 	WindowClassStruct.style = CS_OWNDC;
 
 	WindowClassStruct.cbClsExtra = 0;
 	WindowClassStruct.cbWndExtra = 0;
-	WindowClassStruct.hIcon = static_cast<HICON>(LoadImage(pWindowClass->GetApplicationHandle(), MAKEINTRESOURCE(IDI_ICON2), IMAGE_ICON, 32, 32, 0));
+	WindowClassStruct.hIcon = static_cast<HICON>(LoadImage(m_applicationHandle, MAKEINTRESOURCE(IDI_ICON2), IMAGE_ICON, 32, 32, 0));
 	WindowClassStruct.hCursor = nullptr;
 	WindowClassStruct.hbrBackground = nullptr;
 
@@ -28,20 +25,16 @@ std::shared_ptr<WindowAPIClass> WindowAPIClass::CreateObject(LPCWSTR className, 
 	{
 		std::wstring errorString = std::to_wstring(GetLastError());
 		MessageBox(nullptr, errorString.c_str(), L"Error registering window class", MB_OK | MB_ICONEXCLAMATION);
-		return nullptr;
+		throw - 1;
 	}
-
-	return pWindowClass;
 }
-bool WindowAPIClass::DestroyObject() const noexcept
+WindowAPIClass::~WindowAPIClass()
 {
 	if (!UnregisterClass(m_pName, m_applicationHandle))
 	{
 		ErrorHandler::ErrorBox(L"Error Unregistering Window Class from WIN32 API", GetLastError(), __FILE__, __LINE__);
-		return false;
+		throw - 1;
 	}
-
-	return true;
 }
 
 
@@ -54,23 +47,6 @@ LPCTSTR WindowAPIClass::GetName() const noexcept
 {
 	return m_pName;
 }
-
-
-void WindowAPIClass::SetApplicationHandle(HINSTANCE applicationHandle) noexcept
-{
-	m_applicationHandle = applicationHandle;
-}
-
-void WindowAPIClass::SetName(LPCWSTR className) noexcept
-{
-	m_pName = className;
-}
-
-void WindowAPIClass::SetMessageHandler(MessageHandler messageHandler) noexcept
-{
-	m_messageHandler = messageHandler;
-}
-
 
 LRESULT CALLBACK WindowAPIClass::HandleMessageEntryPoint(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam) noexcept
 {
@@ -95,4 +71,9 @@ LRESULT CALLBACK WindowAPIClass::HandleMessageEntryPoint(HWND windowHandle, UINT
 	if (pWindowClass)
 		return pWindowClass->m_messageHandler(windowHandle, message, wParam, lParam);
 	return DefWindowProc(windowHandle, message, wParam, lParam);
+}
+
+void WindowAPIClass::SetMessageHandler(MessageHandler messageHandler) noexcept
+{
+	m_messageHandler = messageHandler;
 }

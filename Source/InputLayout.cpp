@@ -13,5 +13,6 @@ InputLayout::InputLayout(Graphics* gfx, std::vector<D3D11_INPUT_ELEMENT_DESC> de
 
 void InputLayout::Bind(Graphics* gfx) noexcept
 {
-	gfx->GetContext()->IASetInputLayout(m_pBuffer.Get());
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext = gfx->GetContext();
+	pContext->IASetInputLayout(m_pBuffer.Get());
 }

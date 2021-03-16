@@ -27,5 +27,6 @@ PixelShader::PixelShader(Graphics* gfx, std::wstring shaderPath)
 
 void PixelShader::Bind(Graphics* gfx) noexcept
 {
-	gfx->GetContext()->PSSetShader(m_pBuffer.Get(), nullptr, 0u);
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext = gfx->GetContext();
+	pContext->PSSetShader(m_pBuffer.Get(), nullptr, 0u);
 }
