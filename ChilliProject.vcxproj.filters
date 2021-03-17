@@ -66,7 +66,7 @@
     <ClCompile Include="Source\IDrawable.cpp">
       <Filter>Source Files\Drawables</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Cube.cpp">
+    <ClCompile Include="Source\Box.cpp">
       <Filter>Source Files\Drawables</Filter>
     </ClCompile>
     <ClCompile Include="Source\Window.cpp">
@@ -164,7 +164,7 @@
     <ClInclude Include="Source\IDrawable.h">
       <Filter>Header Files\Drawables</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Cube.h">
+    <ClInclude Include="Source\Box.h">
       <Filter>Header Files\Drawables</Filter>
     </ClInclude>
     <ClInclude Include="Source\VertexShader.h">

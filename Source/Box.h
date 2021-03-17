@@ -5,10 +5,10 @@
 #include "TransformMatrixCBuffer.h"
 #include "Topology.h"
 
-class Cube : public IDrawable
+class Box : public IDrawable
 {
 public:
-	Cube(
+	Box(
 		std::shared_ptr<Graphics> pGfx,
 		std::mt19937& rng,
 		std::uniform_real_distribution<float>& rDistribution,
@@ -47,10 +47,10 @@ private:
 
 
 public:
-	Cube(const Cube&) = delete;
-	Cube& operator = (const Cube&) = delete;
+	Box(const Box&) = delete;
+	Box& operator = (const Box&) = delete;
 
-	Cube(Cube&&) = delete;
-	Cube& operator = (Cube&&) = delete;
+	Box(Box&&) = delete;
+	Box& operator = (Box&&) = delete;
 };
 

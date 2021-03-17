@@ -166,7 +166,7 @@
     <ClCompile Include="Source\Application.cpp" />
     <ClCompile Include="Source\BindableFactory.cpp" />
     <ClCompile Include="Source\ConstantBuffer.cpp" />
-    <ClCompile Include="Source\Cube.cpp" />
+    <ClCompile Include="Source\Box.cpp" />
     <ClCompile Include="Source\DxgiInfoManager.cpp" />
     <ClCompile Include="Source\TransformMatrixCBuffer.cpp" />
     <ClCompile Include="Source\Graphics.cpp" />
@@ -191,7 +191,7 @@
     <ClInclude Include="Source\Application.h" />
     <ClInclude Include="Source\BindableFactory.h" />
     <ClInclude Include="Source\ConstantBuffer.h" />
-    <ClInclude Include="Source\Cube.h" />
+    <ClInclude Include="Source\Box.h" />
     <ClInclude Include="Source\TransformMatrixCBuffer.h" />
     <ClInclude Include="Source\IBindable.h" />
     <ClInclude Include="Source\DxgiInfoManager.h" />

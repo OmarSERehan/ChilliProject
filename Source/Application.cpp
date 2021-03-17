@@ -13,7 +13,7 @@ Application::Application()
 	std::uniform_real_distribution<float> gaDistribution(0.0f, 3.1415f * 2.0f);
 	for (uint16_t i = 0u; i < 30u; i++)
 	{
-		m_pBoxes.push_back(std::make_unique<Cube>(m_pWindow->GetGraphics(), rng, rDistribution, grDistribution, laDistribution, gaDistribution));
+		m_pBoxes.push_back(std::make_unique<Box>(m_pWindow->GetGraphics(), rng, rDistribution, grDistribution, laDistribution, gaDistribution));
 	}
 
 	//m_pTriangle = std::make_unique<Triangle>(m_pWindow->GetGraphics()());

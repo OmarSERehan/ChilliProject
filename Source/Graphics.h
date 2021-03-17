@@ -23,7 +23,7 @@ public:
 	
 	void ClearBackBuffer(float r, float g, float b) noexcept;
 	void DrawTestTriangle(float angle, float x, float y);
-	void DrawTestCube(float angle, float x, float y) noexcept;
+	void DrawTestBox(float angle, float x, float y) noexcept;
 
 
 	Microsoft::WRL::ComPtr<ID3D11Device> GetDevice() const;

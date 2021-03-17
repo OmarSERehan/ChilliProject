@@ -476,7 +476,7 @@ void Graphics::DrawTestTriangle(float angle, float x, float y)
 		}*/
 	}
 }
-void Graphics::DrawTestCube(float angle, float x, float y) noexcept
+void Graphics::DrawTestBox(float angle, float x, float y) noexcept
 {}
 
 Microsoft::WRL::ComPtr<ID3D11Device> Graphics::GetDevice() const
