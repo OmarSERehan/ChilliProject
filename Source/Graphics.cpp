@@ -175,24 +175,7 @@ void Graphics::SwapFrames()
 	HRESULT result = m_pSwapChain->Present(1u, NULL);
 	if (FAILED(result) == TRUE)
 	{
-		result = m_pDevice->GetDeviceRemovedReason();
-		switch (result) // TODO: specify error reason
-		{
-		case DXGI_ERROR_DEVICE_HUNG:
-			break;
-		case DXGI_ERROR_DEVICE_REMOVED:
-			break;
-		case DXGI_ERROR_DEVICE_RESET:
-			break;
-		case DXGI_ERROR_DRIVER_INTERNAL_ERROR:
-			break;
-		case DXGI_ERROR_INVALID_CALL:
-			break;
-		default:
-			break;
-		}
-		std::wstring errorString = L"IDXGISwapChain::Present: Failed";
-		MessageBox(nullptr, errorString.c_str(), L"Error swapping buffers", MB_OK | MB_ICONEXCLAMATION);
+		ErrorHandler::ErrorBox(L"Error Presenting Frame", m_pDevice->GetDeviceRemovedReason(), __FILE__, __LINE__);
 		throw - 1;
 	}
 }

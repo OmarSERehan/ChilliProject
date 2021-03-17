@@ -182,7 +182,6 @@
     <ClCompile Include="Source\Triangle.cpp" />
     <ClCompile Include="Source\VertexBuffer.cpp" />
     <ClCompile Include="Source\VertexShader.cpp" />
-    <ClCompile Include="Source\Viewport.cpp" />
     <ClCompile Include="Source\Window.cpp" />
     <ClCompile Include="Source\WindowAPIClass.cpp" />
     <ClCompile Include="Source\WinMain.cpp" />
@@ -209,7 +208,6 @@
     <ClInclude Include="Source\Triangle.h" />
     <ClInclude Include="Source\VertexBuffer.h" />
     <ClInclude Include="Source\VertexShader.h" />
-    <ClInclude Include="Source\Viewport.h" />
     <ClInclude Include="Source\Window.h" />
     <ClInclude Include="Source\WindowAPIClass.h" />
     <ClInclude Include="Source\WinHeader.h" />

@@ -8,7 +8,6 @@
 #include "ConstantBuffer.h"
 #include "TransformMatrixCBuffer.h"
 #include "Topology.h"
-#include "Viewport.h"
 
 
 class Triangle : public IDrawable

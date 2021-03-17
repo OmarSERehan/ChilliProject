@@ -102,9 +102,6 @@
     <ClCompile Include="Source\TransformMatrixCBuffer.cpp">
       <Filter>Source Files\Bindables</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Viewport.cpp">
-      <Filter>Source Files\Bindables</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Triangle.cpp">
       <Filter>Source Files\Drawables</Filter>
     </ClCompile>
@@ -179,14 +176,11 @@
     <ClInclude Include="Source\TransformMatrixCBuffer.h">
       <Filter>Header Files\Bindables</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Viewport.h">
+    <ClInclude Include="Source\BindableFactory.h">
       <Filter>Header Files\Bindables</Filter>
     </ClInclude>
     <ClInclude Include="Source\Triangle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\BindableFactory.h">
-      <Filter>Header Files\Bindables</Filter>
+      <Filter>Header Files\Drawables</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
