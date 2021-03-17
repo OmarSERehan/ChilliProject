@@ -1,8 +1,8 @@
 #pragma once
 #include "Window.h"
 #include "Timer.h"
-#include <iomanip>
 #include "Box.h"
+#include "Ball.h"
 #include "Triangle.h"
 
 class Application
@@ -19,5 +19,6 @@ private:
 	std::shared_ptr<Timer> m_pTimer = nullptr;
 
 	std::vector<std::unique_ptr<Box>> m_pBoxes;
+	std::vector<std::unique_ptr<Ball>> m_pBalls;
 	std::unique_ptr<Triangle> m_pTriangle = nullptr;
 };

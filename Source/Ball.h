@@ -4,10 +4,10 @@
 #include "TransformMatrixCBuffer.h"
 
 
-class Box : public IDrawable
+class Ball : public IDrawable
 {
 public:
-	Box(
+	Ball(
 		std::shared_ptr<Graphics> pGfx,
 		std::mt19937& rng,
 		std::uniform_real_distribution<float>& rDistribution,
@@ -23,12 +23,12 @@ public:
 
 private:
 	float m_radius = 0.0f;
-	
+
 	/// Rotation around local origin
 	float m_pitch = 0.0f;
 	float m_yaw = 0.0f;
 	float m_roll = 0.0f;
-	
+
 	/// Rotation around world origin
 	float m_theta = 0.0f;
 	float m_phi = 0.0f;
@@ -46,10 +46,10 @@ private:
 
 
 public:
-	Box(const Box&) = delete;
-	Box& operator = (const Box&) = delete;
+	Ball(const Ball&) = delete;
+	Ball& operator = (const Ball&) = delete;
 
-	Box(Box&&) = delete;
-	Box& operator = (Box&&) = delete;
+	Ball(Ball&&) = delete;
+	Ball& operator = (Ball&&) = delete;
 };
 

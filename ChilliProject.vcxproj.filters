@@ -108,6 +108,12 @@
     <ClCompile Include="Source\BindableFactory.cpp">
       <Filter>Source Files\Bindables</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Ball.cpp">
+      <Filter>Source Files\Drawables</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\GeometryFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -182,6 +188,12 @@
     <ClInclude Include="Source\Triangle.h">
       <Filter>Header Files\Drawables</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Ball.h">
+      <Filter>Header Files\Drawables</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GeometryFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ChilliProject.rc">
@@ -210,6 +222,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Source\SimpleCubeVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\SimpleSphereVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Source\SimpleSpherePS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

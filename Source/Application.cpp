@@ -11,8 +11,9 @@ Application::Application()
 	std::uniform_real_distribution<float> grDistribution(0.0f, 3.1415f * 0.3f);
 	std::uniform_real_distribution<float> laDistribution(0.0f, 3.1415f * 2.0f);
 	std::uniform_real_distribution<float> gaDistribution(0.0f, 3.1415f * 2.0f);
-	for (uint16_t i = 0u; i < 30u; i++)
+	for (uint16_t i = 0u; i < 10u; i++)
 	{
+		m_pBalls.push_back(std::make_unique<Ball>(m_pWindow->GetGraphics(), rng, rDistribution, grDistribution, laDistribution, gaDistribution));
 		m_pBoxes.push_back(std::make_unique<Box>(m_pWindow->GetGraphics(), rng, rDistribution, grDistribution, laDistribution, gaDistribution));
 	}
 
@@ -51,6 +52,11 @@ void Application::Frame()
 	{
 		pBox->Update(deltaTime);
 		pBox->Draw(m_pWindow->GetGraphics());
+	}
+	for (auto& pBall : m_pBalls)
+	{
+		pBall->Update(deltaTime);
+		pBall->Draw(m_pWindow->GetGraphics());
 	}
 
 	m_pWindow->GetGraphics()->SwapFrames();

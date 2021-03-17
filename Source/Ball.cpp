@@ -1,6 +1,6 @@
-#include "Box.h"
+#include "Ball.h"
 
-Box::Box(
+Ball::Ball(
 	std::shared_ptr<Graphics> ppGfx,
 	std::mt19937& rng,
 	std::uniform_real_distribution<float>& rDistribution,
@@ -23,13 +23,13 @@ Box::Box(
 	m_deltaPhi(gaDistribution(rng)),
 	m_deltaChi(gaDistribution(rng))
 {
-	AddBinds(BindableFactory::GetBoxBindables(ppGfx, m_indexBufferCount));
+	AddBinds(BindableFactory::GetBallBindables(ppGfx, m_indexBufferCount));
 
 	/// Transformation Matrix
 	AddBind(std::make_shared<TransformMatrixCBuffer>(ppGfx, this));
 }
 
-void Box::Update(float deltaTime) noexcept
+void Ball::Update(float deltaTime) noexcept
 {
 	m_pitch += m_deltaPitch * deltaTime;
 	m_yaw += m_deltaYaw * deltaTime;
@@ -40,7 +40,7 @@ void Box::Update(float deltaTime) noexcept
 	m_chi += m_deltaChi * deltaTime;
 }
 
-DirectX::XMMATRIX Box::GetModelMatrix() const noexcept
+DirectX::XMMATRIX Ball::GetModelMatrix() const noexcept
 {
 	return
 		DirectX::XMMatrixRotationRollPitchYaw(m_pitch, m_yaw, m_roll) *
