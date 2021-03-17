@@ -10,7 +10,7 @@ class Cube : public IDrawable
 {
 public:
 	Cube(
-		Graphics* gfx,
+		std::shared_ptr<Graphics> pGfx,
 		std::mt19937& rng,
 		std::uniform_real_distribution<float>& rDistribution,
 		std::uniform_real_distribution<float>& grDistribution,

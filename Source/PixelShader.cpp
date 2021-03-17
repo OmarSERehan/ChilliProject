@@ -1,7 +1,7 @@
 #include "PixelShader.h"
 
 
-PixelShader::PixelShader(Graphics* gfx, std::wstring shaderPath)
+PixelShader::PixelShader(std::shared_ptr<Graphics> pGfx, std::wstring shaderPath)
 {
 	/// Read Compiled Shader From Disk
 	Microsoft::WRL::ComPtr<ID3DBlob> pBlob = nullptr;
@@ -16,7 +16,7 @@ PixelShader::PixelShader(Graphics* gfx, std::wstring shaderPath)
 
 	/// Create Shader Buffer
 	{
-		HRESULT result = gfx->GetDevice()->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &m_pBuffer);
+		HRESULT result = pGfx->GetDevice()->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &m_pBuffer);
 		if (FAILED(result) == TRUE)
 		{
 			ErrorHandler::ErrorBox(L"Error Creating Pixel Shader Object", result, __FILE__, __LINE__);
@@ -25,8 +25,8 @@ PixelShader::PixelShader(Graphics* gfx, std::wstring shaderPath)
 	}
 }
 
-void PixelShader::Bind(Graphics* gfx) noexcept
+void PixelShader::Bind(std::shared_ptr<Graphics> pGfx) noexcept
 {
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext = gfx->GetContext();
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext = pGfx->GetContext();
 	pContext->PSSetShader(m_pBuffer.Get(), nullptr, 0u);
 }

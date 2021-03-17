@@ -11,14 +11,14 @@
 #include "Topology.h"
 
 #define BindableMap std::unordered_map< \
-						Graphics*, \
+						std::shared_ptr<Graphics>, \
 						std::pair<uint32_t, std::vector<std::shared_ptr<IBindable>>> \
 					> \
 
 class BindableFactory
 {
 public:
-	static std::vector<std::shared_ptr<IBindable>> GetBoxBindables(Graphics* pGfx, uint32_t& indexCount);
+	static std::vector<std::shared_ptr<IBindable>> GetBoxBindables(std::shared_ptr<Graphics> ppGfx, uint32_t& indexCount);
 
 private:
 	static BindableMap m_pBoxBindablesMap;

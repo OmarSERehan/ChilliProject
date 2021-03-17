@@ -7,7 +7,7 @@ class Topology : public IBindable
 public:
 	Topology(D3D11_PRIMITIVE_TOPOLOGY type);
 
-	void Bind(Graphics* gfx) noexcept;
+	void Bind(std::shared_ptr<Graphics> pGfx) noexcept;
 
 private:
 	D3D11_PRIMITIVE_TOPOLOGY m_type;

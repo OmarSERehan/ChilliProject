@@ -4,19 +4,19 @@
 BindableMap BindableFactory::m_pBoxBindablesMap = BindableMap();
 
 
-std::vector<std::shared_ptr<IBindable>> BindableFactory::GetBoxBindables(Graphics* pGfx, uint32_t& indexCount)
+std::vector<std::shared_ptr<IBindable>> BindableFactory::GetBoxBindables(std::shared_ptr<Graphics> ppGfx, uint32_t& indexCount)
 {
-	if (m_pBoxBindablesMap.find(pGfx) != m_pBoxBindablesMap.end())
+	if (m_pBoxBindablesMap.find(ppGfx) != m_pBoxBindablesMap.end())
 	{
-		const auto& bindableGroup = m_pBoxBindablesMap[pGfx];
+		const auto& bindableGroup = m_pBoxBindablesMap[ppGfx];
 		
 		indexCount = bindableGroup.first;
 		return bindableGroup.second;
 	}
 	else
 	{
-		m_pBoxBindablesMap.insert({ pGfx, { 0u, std::vector<std::shared_ptr<IBindable>>() } });
-		auto& bindableGroup = m_pBoxBindablesMap[pGfx];
+		m_pBoxBindablesMap.insert({ ppGfx, { 0u, std::vector<std::shared_ptr<IBindable>>() } });
+		auto& bindableGroup = m_pBoxBindablesMap[ppGfx];
 
 
 		/// Vertex Buffer
@@ -36,14 +36,14 @@ std::vector<std::shared_ptr<IBindable>> BindableFactory::GetBoxBindables(Graphic
 			{ 1.0f,1.0f,1.0f },
 		};
 		{
-			bindableGroup.second.push_back(std::make_shared<VertexBuffer>(pGfx, vertices));
+			bindableGroup.second.push_back(std::make_shared<VertexBuffer>(ppGfx, vertices));
 		}
 
 
 		/// Vertex Shader
 		Microsoft::WRL::ComPtr<ID3DBlob> pVertexShaderBlob = nullptr;
 		{
-			std::shared_ptr<VertexShader> pVertexShader = std::make_shared<VertexShader>(pGfx, L"Source/SimpleCubeVS.cso");
+			std::shared_ptr<VertexShader> pVertexShader = std::make_shared<VertexShader>(ppGfx, L"Source/SimpleCubeVS.cso");
 			pVertexShaderBlob = pVertexShader->GetBlob();
 			bindableGroup.second.push_back(std::move(pVertexShader));
 		}
@@ -51,7 +51,7 @@ std::vector<std::shared_ptr<IBindable>> BindableFactory::GetBoxBindables(Graphic
 
 		/// Pixel Shader
 		{
-			bindableGroup.second.push_back(std::make_shared<PixelShader>(pGfx, L"Source/SimpleCubePS.cso"));
+			bindableGroup.second.push_back(std::make_shared<PixelShader>(ppGfx, L"Source/SimpleCubePS.cso"));
 		}
 
 
@@ -67,7 +67,7 @@ std::vector<std::shared_ptr<IBindable>> BindableFactory::GetBoxBindables(Graphic
 				0,1,4, 1,5,4
 			};
 			bindableGroup.first = indices.size();
-			bindableGroup.second.push_back(std::make_shared<IndexBuffer>(pGfx, indices));
+			bindableGroup.second.push_back(std::make_shared<IndexBuffer>(ppGfx, indices));
 		}
 
 
@@ -87,7 +87,7 @@ std::vector<std::shared_ptr<IBindable>> BindableFactory::GetBoxBindables(Graphic
 					{ 0.0f, 1.0f, 1.0f }
 				}
 			};
-			bindableGroup.second.push_back(std::make_shared<PixelConstantBuffer<ColorArray>>(pGfx, pConstBuffer));
+			bindableGroup.second.push_back(std::make_shared<PixelConstantBuffer<ColorArray>>(ppGfx, pConstBuffer));
 		}
 
 
@@ -107,7 +107,7 @@ std::vector<std::shared_ptr<IBindable>> BindableFactory::GetBoxBindables(Graphic
 			}
 		};
 		{
-			bindableGroup.second.push_back(std::make_shared<InputLayout>(pGfx, inputLayoutDescription, pVertexShaderBlob));
+			bindableGroup.second.push_back(std::make_shared<InputLayout>(ppGfx, inputLayoutDescription, pVertexShaderBlob));
 		}
 
 

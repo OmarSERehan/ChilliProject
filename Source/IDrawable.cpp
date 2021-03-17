@@ -2,16 +2,16 @@
 #include "IBindable.h"
 #include "IndexBuffer.h"
 
-void IDrawable::BindAll(Graphics* gfx) const noexcept
+void IDrawable::BindAll(std::shared_ptr<Graphics> pGfx) const noexcept
 {
 	for (auto& bindable : m_bindables)
-		bindable->Bind(gfx);
+		bindable->Bind(pGfx);
 }
 
-void IDrawable::Draw(Graphics* gfx) const noexcept
+void IDrawable::Draw(std::shared_ptr<Graphics> pGfx) const noexcept
 {
-	BindAll(gfx);
-	gfx->DrawIndexed(m_indexBufferCount);
+	BindAll(pGfx);
+	pGfx->DrawIndexed(m_indexBufferCount);
 }
 
 void IDrawable::AddBind(std::shared_ptr<IBindable> pBindable) noexcept

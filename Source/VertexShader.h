@@ -5,9 +5,9 @@
 class VertexShader : public IBindable
 {
 public:
-	VertexShader(Graphics* gfx, std::wstring shaderPath);
+	VertexShader(std::shared_ptr<Graphics> pGfx, std::wstring shaderPath);
 
-	virtual void Bind(Graphics* gfx) noexcept override;
+	virtual void Bind(std::shared_ptr<Graphics> pGfx) noexcept override;
 
 	Microsoft::WRL::ComPtr<ID3DBlob> GetBlob() const noexcept;
 

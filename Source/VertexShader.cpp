@@ -1,7 +1,7 @@
 #include "VertexShader.h"
 
 
-VertexShader::VertexShader(Graphics* gfx, std::wstring shaderPath)
+VertexShader::VertexShader(std::shared_ptr<Graphics> pGfx, std::wstring shaderPath)
 {
 	/// Read Compiled Shader From Disk
 	{
@@ -15,7 +15,7 @@ VertexShader::VertexShader(Graphics* gfx, std::wstring shaderPath)
 
 	/// Create Shader Buffer
 	{
-		HRESULT result = gfx->GetDevice()->CreateVertexShader(m_pBlob->GetBufferPointer(), m_pBlob->GetBufferSize(), nullptr, &m_pBuffer);
+		HRESULT result = pGfx->GetDevice()->CreateVertexShader(m_pBlob->GetBufferPointer(), m_pBlob->GetBufferSize(), nullptr, &m_pBuffer);
 		if (FAILED(result) == TRUE)
 		{
 			ErrorHandler::ErrorBox(L"Error Creating Vertex Shader Object", result, __FILE__, __LINE__);
@@ -24,9 +24,9 @@ VertexShader::VertexShader(Graphics* gfx, std::wstring shaderPath)
 	}
 }
 
-void VertexShader::Bind(Graphics* gfx) noexcept
+void VertexShader::Bind(std::shared_ptr<Graphics> pGfx) noexcept
 {
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext = gfx->GetContext();
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext = pGfx->GetContext();
 	pContext->VSSetShader(m_pBuffer.Get(), nullptr, 0u);
 }
 

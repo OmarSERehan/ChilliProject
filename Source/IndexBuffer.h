@@ -5,9 +5,9 @@
 class IndexBuffer : public IBindable
 {
 public:
-	IndexBuffer(Graphics* gfx, const std::vector<uint16_t>& indices);
+	IndexBuffer(std::shared_ptr<Graphics> pGfx, const std::vector<uint16_t>& indices);
 
-	virtual void Bind(Graphics* gfx) noexcept override;
+	virtual void Bind(std::shared_ptr<Graphics> pGfx) noexcept override;
 
 	uint32_t GetCount() const noexcept
 	{

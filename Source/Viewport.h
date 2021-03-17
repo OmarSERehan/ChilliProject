@@ -7,7 +7,7 @@ class Viewport : public IBindable
 public:
 	Viewport(float width, float height);
 
-	void Bind(Graphics* gfx) noexcept;
+	void Bind(std::shared_ptr<Graphics> pGfx) noexcept;
 
 private:
 	D3D11_VIEWPORT m_pBuffer;

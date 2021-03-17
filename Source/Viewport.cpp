@@ -13,8 +13,8 @@ Viewport::Viewport(float width, float height)
 	m_pBuffer.MaxDepth = 1.0f;
 }
 
-void Viewport::Bind(Graphics* gfx) noexcept
+void Viewport::Bind(std::shared_ptr<Graphics> pGfx) noexcept
 {
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext = gfx->GetContext();
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext = pGfx->GetContext();
 	pContext->RSSetViewports(1u, &m_pBuffer);
 }

@@ -14,7 +14,7 @@
 class Triangle : public IDrawable
 {
 public:
-	Triangle(Graphics* gfx);
+	Triangle(std::shared_ptr<Graphics> pGfx);
 
 	virtual void Update(float deltaTime) noexcept override;
 	virtual DirectX::XMMATRIX GetModelMatrix() const noexcept override;

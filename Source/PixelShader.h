@@ -5,9 +5,9 @@
 class PixelShader : public IBindable
 {
 public:
-	PixelShader(Graphics* gfx, std::wstring shaderPath);
+	PixelShader(std::shared_ptr<Graphics> pGfx, std::wstring shaderPath);
 
-	virtual void Bind(Graphics* gfx) noexcept override;
+	virtual void Bind(std::shared_ptr<Graphics> pGfx) noexcept override;
 
 private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pBuffer;

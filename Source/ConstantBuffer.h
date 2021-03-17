@@ -5,7 +5,7 @@ template <class T>
 class ConstantBuffer : public IBindable
 {
 public:
-	ConstantBuffer(Graphics* gfx)
+	ConstantBuffer(std::shared_ptr<Graphics> pGfx)
 	{
 		D3D11_BUFFER_DESC bufferDescription = {};
 		{
@@ -19,14 +19,14 @@ public:
 			bufferDescription.ByteWidth = sizeof(T);
 		}
 
-		HRESULT result = gfx->GetDevice()->CreateBuffer(&bufferDescription, nullptr, &m_pBuffer);
+		HRESULT result = pGfx->GetDevice()->CreateBuffer(&bufferDescription, nullptr, &m_pBuffer);
 		if (FAILED(result) == TRUE)
 		{
 			ErrorHandler::ErrorBox(L"Error Creating Constant Buffer Object", result, __FILE__, __LINE__);
 			throw - 1;
 		}
 	}
-	ConstantBuffer(Graphics* gfx, const T& buffer)
+	ConstantBuffer(std::shared_ptr<Graphics> pGfx, const T& buffer)
 	{
 		D3D11_BUFFER_DESC bufferDescription = {};
 		{
@@ -45,7 +45,7 @@ public:
 			bufferInitialData.pSysMem = &buffer;
 		}
 
-		HRESULT result = gfx->GetDevice()->CreateBuffer(&bufferDescription, &bufferInitialData, &m_pBuffer);
+		HRESULT result = pGfx->GetDevice()->CreateBuffer(&bufferDescription, &bufferInitialData, &m_pBuffer);
 		if (FAILED(result) == TRUE)
 		{
 			ErrorHandler::ErrorBox(L"Error Creating Constant Buffer Object", result, __FILE__, __LINE__);
@@ -54,12 +54,12 @@ public:
 	}
 
 	// update constant buffer data in VRAM
-	void Update(Graphics* gfx, const T& buffer) noexcept
+	void Update(std::shared_ptr<Graphics> pGfx, const T& buffer) noexcept
 	{
 		D3D11_MAPPED_SUBRESOURCE mappedSubresource;
-		gfx->GetContext()->Map(m_pBuffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &mappedSubresource);
+		pGfx->GetContext()->Map(m_pBuffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &mappedSubresource);
 		memcpy(mappedSubresource.pData, &buffer, sizeof(buffer));
-		gfx->GetContext()->Unmap(m_pBuffer.Get(), 0u);
+		pGfx->GetContext()->Unmap(m_pBuffer.Get(), 0u);
 	}
 
 protected:
@@ -73,9 +73,9 @@ class VertexConstantBuffer : public ConstantBuffer<T>
 public:
 	using ConstantBuffer<T>::ConstantBuffer;
 
-	virtual void Bind(Graphics* gfx) noexcept override
+	virtual void Bind(std::shared_ptr<Graphics> pGfx) noexcept override
 	{
-		gfx->GetContext()->VSSetConstantBuffers(0u, 1u, this->m_pBuffer.GetAddressOf());
+		pGfx->GetContext()->VSSetConstantBuffers(0u, 1u, this->m_pBuffer.GetAddressOf());
 	}
 };
 
@@ -86,8 +86,8 @@ class PixelConstantBuffer : public ConstantBuffer<T>
 public:
 	using ConstantBuffer<T>::ConstantBuffer;
 
-	virtual void Bind(Graphics* gfx) noexcept override
+	virtual void Bind(std::shared_ptr<Graphics> pGfx) noexcept override
 	{
-		gfx->GetContext()->PSSetConstantBuffers(0u, 1u, this->m_pBuffer.GetAddressOf());
+		pGfx->GetContext()->PSSetConstantBuffers(0u, 1u, this->m_pBuffer.GetAddressOf());
 	}
 };

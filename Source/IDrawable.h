@@ -16,8 +16,8 @@ public:
 
 	virtual void Update(float deltaTime) noexcept = 0;
 	
-	void BindAll(Graphics* gfx) const noexcept;
-	void Draw(Graphics* gfx) const noexcept;
+	void BindAll(std::shared_ptr<Graphics> pGfx) const noexcept;
+	void Draw(std::shared_ptr<Graphics> pGfx) const noexcept;
 
 	virtual DirectX::XMMATRIX GetModelMatrix() const noexcept = 0;
 	

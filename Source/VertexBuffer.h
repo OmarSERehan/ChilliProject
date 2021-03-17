@@ -5,7 +5,7 @@ class VertexBuffer : public IBindable
 {
 public:
 	template<class Vertex>
-	VertexBuffer(Graphics* pGfx, const std::vector<Vertex>& vertices)
+	VertexBuffer(std::shared_ptr<Graphics> ppGfx, const std::vector<Vertex>& vertices)
 		:
 		m_stride(sizeof(Vertex))
 	{
@@ -29,7 +29,7 @@ public:
 
 		/// Create vertex buffer
 		{
-			HRESULT result = pGfx->GetDevice()->CreateBuffer(&bufferDescription, &bufferInitialData, &m_pBuffer);
+			HRESULT result = ppGfx->GetDevice()->CreateBuffer(&bufferDescription, &bufferInitialData, &m_pBuffer);
 			/*std::stringstream stringStream;
 			stringStream << std::hex << m_pBuffer.Get();
 			std::string str = stringStream.str();
@@ -42,7 +42,7 @@ public:
 		}
 	}
 
-	virtual void Bind(Graphics* pGfx) noexcept override;
+	virtual void Bind(std::shared_ptr<Graphics> ppGfx) noexcept override;
 
 private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_pBuffer;

@@ -7,9 +7,9 @@
 class TransformMatrixCBuffer : public IBindable
 {
 public:
-	TransformMatrixCBuffer(Graphics* gfx, IDrawable* pParent);
+	TransformMatrixCBuffer(std::shared_ptr<Graphics> pGfx, IDrawable* pParent);
 
-	virtual void Bind(Graphics* gfx) noexcept override;
+	virtual void Bind(std::shared_ptr<Graphics> pGfx) noexcept override;
 
 private:
 	VertexConstantBuffer<DirectX::XMMATRIX> m_pCBuffer;

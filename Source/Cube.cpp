@@ -2,7 +2,7 @@
 
 
 Cube::Cube(
-	Graphics* pGfx,
+	std::shared_ptr<Graphics> ppGfx,
 	std::mt19937& rng,
 	std::uniform_real_distribution<float>& rDistribution,
 	std::uniform_real_distribution<float>& grDistribution,
@@ -24,10 +24,10 @@ Cube::Cube(
 	m_deltaPhi(gaDistribution(rng)),
 	m_deltaChi(gaDistribution(rng))
 {
-	AddBinds(BindableFactory::GetBoxBindables(pGfx, m_indexBufferCount));
+	AddBinds(BindableFactory::GetBoxBindables(ppGfx, m_indexBufferCount));
 
 	/// Transformation Matrix
-	AddBind(std::make_shared<TransformMatrixCBuffer>(pGfx, this));
+	AddBind(std::make_shared<TransformMatrixCBuffer>(ppGfx, this));
 }
 
 void Cube::Update(float deltaTime) noexcept

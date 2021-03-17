@@ -11,5 +11,5 @@
 class IBindable
 {
 public:
-	virtual void Bind(Graphics* gfx) noexcept = 0;
+	virtual void Bind(std::shared_ptr<Graphics> pGfx) noexcept = 0;
 };
