@@ -14,7 +14,7 @@ void IDrawable::Draw(Graphics* gfx) const noexcept
 	gfx->DrawIndexed(m_indexBufferCount);
 }
 
-void IDrawable::AddBind(std::unique_ptr<IBindable> pBindable) noexcept
+void IDrawable::AddBind(std::shared_ptr<IBindable> pBindable) noexcept
 {
 	if (typeid(*pBindable) == typeid(IndexBuffer))
 	{
@@ -22,4 +22,8 @@ void IDrawable::AddBind(std::unique_ptr<IBindable> pBindable) noexcept
 	}
 
 	m_bindables.push_back(std::move(pBindable));
+}
+void IDrawable::AddBinds(std::vector<std::shared_ptr<IBindable>> bindables) noexcept
+{
+	m_bindables.insert(m_bindables.end(), bindables.begin(), bindables.end());
 }

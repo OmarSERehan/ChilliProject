@@ -13,7 +13,7 @@ Triangle::Triangle(Graphics* gfx)
 	}
 
 
-	struct Vertex
+	/*struct Vertex
 	{
 		struct { float x, y; } Position;
 		struct { unsigned char r, g, b, a; } Color;
@@ -24,7 +24,7 @@ Triangle::Triangle(Graphics* gfx)
 		{ +0.5f, -0.5f,		000, 255, 000, 255 },
 		{ -0.5f, -0.5f,		000, 000, 255, 255 }
 	};
-	AddBind(std::make_unique<VertexBuffer>(gfx, vertices));
+	AddBind(std::make_unique<VertexBuffer>(gfx, vertices));*/
 
 
 	std::vector<uint16_t> indices

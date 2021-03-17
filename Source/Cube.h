@@ -1,11 +1,6 @@
 #pragma once
 #include "IDrawable.h"
-#include "IBindable.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "InputLayout.h"
-#include "VertexShader.h"
-#include "PixelShader.h"
+#include "BindableFactory.h"
 #include "ConstantBuffer.h"
 #include "TransformMatrixCBuffer.h"
 #include "Topology.h"

@@ -11,7 +11,8 @@ class IBindable;
 class IDrawable
 {
 public:
-	void AddBind(std::unique_ptr<IBindable> bindable) noexcept;
+	void AddBind(std::shared_ptr<IBindable> bindable) noexcept;
+	void AddBinds(std::vector<std::shared_ptr<IBindable>> bindables) noexcept;
 
 	virtual void Update(float deltaTime) noexcept = 0;
 	
@@ -22,7 +23,9 @@ public:
 	
 
 private:
-	std::vector<std::unique_ptr<IBindable>> m_bindables;
+	std::vector<std::shared_ptr<IBindable>> m_bindables;
+	
+protected:
 	uint32_t m_indexBufferCount = 0u;
 
 

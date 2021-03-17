@@ -164,6 +164,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Application.cpp" />
+    <ClCompile Include="Source\BindableFactory.cpp" />
     <ClCompile Include="Source\ConstantBuffer.cpp" />
     <ClCompile Include="Source\Cube.cpp" />
     <ClCompile Include="Source\DxgiInfoManager.cpp" />
@@ -189,6 +190,7 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="Source\Application.h" />
+    <ClInclude Include="Source\BindableFactory.h" />
     <ClInclude Include="Source\ConstantBuffer.h" />
     <ClInclude Include="Source\Cube.h" />
     <ClInclude Include="Source\TransformMatrixCBuffer.h" />
